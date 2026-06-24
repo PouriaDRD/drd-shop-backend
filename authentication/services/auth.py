@@ -60,8 +60,6 @@ class AuthService:
 
         cls._validate_otp(otp, code, phone_number)
 
-        OTPRepository.mark_as_verified(otp)
-
         user = UserRepository.get_by_phone(otp.phone_number)
 
         if not user:
@@ -112,6 +110,9 @@ class AuthService:
         if otp.code != code.strip():
             OTPRepository.increment_attempts(otp)
             raise ValidationError("Wrong OTP.")
+
+        OTPRepository.increment_attempts(otp)
+        OTPRepository.mark_as_verified(otp)
 
     @staticmethod
     def _send_otp(phone_number: str, code: str):
