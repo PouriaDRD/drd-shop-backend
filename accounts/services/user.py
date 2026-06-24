@@ -1,50 +1,33 @@
 from typing import Optional
-
-from django.db import transaction
 from rest_framework.exceptions import ValidationError
 
-from accounts.models import UserModel
 from accounts.repositories import UserRepository
 from accounts.utils import validate_iranian_mobile
 
 
 class UserService:
     """
-    Service layer for user business logic.
+    Business logic for user management.
     """
 
     @staticmethod
-    @transaction.atomic
     def create_user(phone_number: str, email: Optional[str] = None, **extra_fields):
         """
-        Create user with uniqueness validation.
+        Business rules:
+        - user must be unique
         """
 
-        if UserRepository.get_user_by_phone_number(phone_number):
+        if UserRepository.get_by_phone(phone_number):
             raise ValidationError({"phone_number": "User already exists."})
 
-        if email and UserRepository.get_user_by_email(email):
+        if email and UserRepository.get_by_email(email):
             raise ValidationError({"email": "User already exists."})
 
-        new_user = UserRepository.create_user(phone_number, email, **extra_fields)
-
-        return new_user
+        return UserRepository.create_user(phone_number, email, **extra_fields)
 
     @staticmethod
-    @transaction.atomic
-    def update_user_password(user: UserModel, new_password: str):
-        """
-        Update user password.
-        """
-
-        return UserRepository.update_user_password(user, new_password)
-
-    @staticmethod
-    def is_phone_number_valid(phone_number: str) -> bool:
-        """
-        Check if phone number is valid.
-        """
-
+    def is_phone_valid(phone_number: str) -> bool:
+        """Validate Iranian phone number format."""
         try:
             validate_iranian_mobile(phone_number)
             return True

@@ -30,6 +30,7 @@ INSTALLED_APPS = [
     "django_cleanup.apps.CleanupSelectedConfig",
     # Custom apps
     "accounts",
+    "authentication",
     # "wallets",
 ]
 
@@ -113,6 +114,8 @@ REST_FRAMEWORK = {
     "DEFAULT_THROTTLE_RATES": {
         "anon": "20/minute",
         "user": "100/minute",
+        "request-otp": "2/minute",
+        "verify-otp": "5/minute",
     },
 }
 
@@ -131,8 +134,8 @@ DEFAULT_FROM_EMAIL = config.email.default_from_email
 # Simple JWT Configuration
 # ---------------------------------------------------------------
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=config.auth.access_token_lifetime),
-    "REFRESH_TOKEN_LIFETIME": timedelta(hours=config.auth.refresh_token_lifetime),
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=config.auth.access_token_lifetime),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=config.auth.refresh_token_lifetime),
     "AUTH_HEADER_TYPES": ("Bearer",),
     "UPDATE_LAST_LOGIN": True,
 }

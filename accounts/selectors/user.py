@@ -1,48 +1,30 @@
+from typing import Optional
 from accounts.models import UserModel
-from accounts.utils import UserStatus, UserRole
+from accounts.utils import UserRole, UserStatus
 
 
 class UserSelector:
     """
-    Selector class for UserModel.
-    Contains read-only methods to check user properties.
+    Read-only user state checks.
+    No DB writes. No side effects.
     """
 
     @staticmethod
-    def is_active(user: UserModel) -> bool:
-        """
-        Check if the user is active.
-
-        Args:
-            user (UserModel): User instance.
-
-        Returns:
-            bool: True if user status is ACTIVE.
-        """
-        return user.status == UserStatus.ACTIVE
+    def is_active(user: Optional[UserModel]) -> bool:
+        """Check if user is active."""
+        return bool(user and user.status == UserStatus.ACTIVE)
 
     @staticmethod
-    def is_admin(user: UserModel) -> bool:
-        """
-        Check if the user has admin privileges.
-
-        Args:
-            user (UserModel): User instance.
-
-        Returns:
-            bool: True if user role is ADMIN and is_staff is True.
-        """
-        return user.role == UserRole.ADMIN
+    def is_admin(user: Optional[UserModel]) -> bool:
+        """Check admin privileges."""
+        return bool(user and user.role == UserRole.ADMIN and user.is_staff)
 
     @staticmethod
-    def is_superuser(user: UserModel) -> bool:
-        """
-        Check if the user is a superuser.
-
-        Args:
-            user (UserModel): User instance.
-
-        Returns:
-            bool: True if user role is SUPERUSER, is_superuser and is_staff are True.
-        """
-        return user.role == UserRole.SUPERUSER
+    def is_superuser(user: Optional[UserModel]) -> bool:
+        """Check superuser privileges."""
+        return bool(
+            user
+            and user.role == UserRole.SUPERUSER
+            and user.is_superuser
+            and user.is_staff
+        )

@@ -61,6 +61,9 @@ class AuthConfig:
     Authentication configuration.
     """
 
+    otp_length: int
+    otp_ttl_minutes: int
+    max_otp_attempts: int
     access_token_lifetime: int
     refresh_token_lifetime: int
 
@@ -102,6 +105,9 @@ class Config:
         )
 
         self.auth = AuthConfig(
+            otp_length=self._get_int("OTP_LENGTH"),
+            otp_ttl_minutes=self._get_int("OTP_TTL_MINUTES"),
+            max_otp_attempts=self._get_int("MAX_OTP_ATTEMPTS"),
             access_token_lifetime=self._get_int("ACCESS_TOKEN_LIFETIME"),
             refresh_token_lifetime=self._get_int("REFRESH_TOKEN_LIFETIME"),
         )

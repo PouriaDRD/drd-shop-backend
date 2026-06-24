@@ -35,7 +35,6 @@ class UserAPIView(RetrieveUpdateAPIView):
                     "success": True,
                     "message": "User data retrieved successfully.",
                     "data": serializer.data,
-                    "errors": [],
                 },
                 status=status.HTTP_200_OK,
             )
@@ -45,8 +44,7 @@ class UserAPIView(RetrieveUpdateAPIView):
                 {
                     "success": False,
                     "message": "Error retrieving user data.",
-                    "data": {},
-                    "errors": [str(e)],
+                    "errors": str(e),
                 },
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
