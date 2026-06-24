@@ -5,6 +5,7 @@ from rest_framework.exceptions import ValidationError
 
 from accounts.models import UserModel
 from accounts.repositories import UserRepository
+from accounts.utils import validate_iranian_mobile
 
 
 class UserService:
@@ -37,3 +38,15 @@ class UserService:
         """
 
         return UserRepository.update_user_password(user, new_password)
+
+    @staticmethod
+    def is_phone_number_valid(phone_number: str) -> bool:
+        """
+        Check if phone number is valid.
+        """
+
+        try:
+            validate_iranian_mobile(phone_number)
+            return True
+        except ValidationError:
+            return False
