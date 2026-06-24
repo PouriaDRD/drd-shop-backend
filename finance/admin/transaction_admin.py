@@ -23,7 +23,6 @@ class TransactionAdmin(admin.ModelAdmin):
         "status_badge",
         "transaction_type_badge",
         "payment_method_badge",
-        "description",
         "updated_at",
         "created_at",
     )
@@ -36,7 +35,7 @@ class TransactionAdmin(admin.ModelAdmin):
 
     search_fields = (
         "id",
-        "wallet__user__username",
+        "wallet__user__phone_number",
     )
 
     readonly_fields = (

@@ -18,7 +18,7 @@ class WalletAdmin(admin.ModelAdmin):
 
     search_fields = (
         "user__id",
-        "user__username",
+        "user__phone_number",
     )
 
     readonly_fields = (

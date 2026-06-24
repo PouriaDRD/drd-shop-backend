@@ -37,6 +37,12 @@ class TransactionRepository:
         return transaction
 
     @staticmethod
-    def get_wallet_transactions(id):
-        transactions = TransactionModel.objects.filter(wallet_id=id)
-        return transactions
+    def get_wallet_transactions(wallet_id: int):
+        """
+        Get wallet transactions ordered by newest first.
+        """
+
+        qs = TransactionModel.objects.filter(wallet_id=wallet_id).order_by(
+            "-created_at"
+        )
+        return qs

@@ -19,15 +19,12 @@ class LedgerAdmin(admin.ModelAdmin):
     )
 
     search_fields = (
-        "wallet__user__username",
+        "wallet__user__phone_number",
         "transaction__id",
     )
 
     readonly_fields = (
         "id",
-        "wallet",
-        "transaction",
-        "amount",
         "created_at",
     )
 
