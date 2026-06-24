@@ -1,12 +1,7 @@
 from django.contrib.auth.base_user import BaseUserManager
 
-
-from accounts.utils import (
-    normalize_iranian_mobile,
-    validate_iranian_mobile,
-    UserRole,
-    UserStatus,
-)
+from accounts.enums import UserRole, UserStatus
+from accounts.utils import normalize_iranian_mobile, validate_iranian_mobile
 
 
 class UserManager(BaseUserManager):

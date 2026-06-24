@@ -4,13 +4,8 @@ from django.core.validators import EmailValidator
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 
 from .user_manager import UserManager
-
-from accounts.utils import (
-    normalize_iranian_mobile,
-    validate_iranian_mobile,
-    UserRole,
-    UserStatus,
-)
+from accounts.enums import UserRole, UserStatus
+from accounts.utils import normalize_iranian_mobile, validate_iranian_mobile
 
 
 class UserModel(AbstractBaseUser, PermissionsMixin):

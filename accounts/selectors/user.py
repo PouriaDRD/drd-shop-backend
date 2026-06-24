@@ -1,6 +1,6 @@
 from typing import Optional
 from accounts.models import UserModel
-from accounts.utils import UserRole, UserStatus
+from accounts.enums import UserRole, UserStatus
 
 
 class UserSelector:

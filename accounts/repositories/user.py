@@ -3,7 +3,8 @@ from django.db import transaction
 from django.utils import timezone
 
 from accounts.models import UserModel
-from accounts.utils import normalize_iranian_mobile, UserRole, UserStatus
+from accounts.enums import UserRole, UserStatus
+from accounts.utils import normalize_iranian_mobile
 
 
 class UserRepository:
@@ -16,7 +17,9 @@ class UserRepository:
     @staticmethod
     @transaction.atomic
     def create_user(
-        phone_number: str, email: Optional[str] = None, **extra_fields
+        phone_number: str,
+        email: Optional[str] = None,
+        **kwargs,
     ) -> UserModel:
         """
         Create a new user in DB.
@@ -36,7 +39,7 @@ class UserRepository:
             email=email,
             role=UserRole.USER,
             status=UserStatus.ACTIVE,
-            **extra_fields,
+            **kwargs,
         )
 
     @staticmethod
