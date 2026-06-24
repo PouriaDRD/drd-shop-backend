@@ -1,7 +1,7 @@
 import uuid
 
 from django.db import models
-from django.conf import settings
+from accounts.models import UserModel
 
 
 class WalletModel(models.Model):
@@ -16,7 +16,7 @@ class WalletModel(models.Model):
     )
 
     user = models.OneToOneField(
-        settings.AUTH_USER_MODEL,
+        UserModel,
         on_delete=models.PROTECT,
         related_name="wallet",
     )

@@ -1,7 +1,6 @@
 import uuid
 
 from django.db import models
-from django.conf import settings
 
 from .wallet import WalletModel
 from .transaction import TransactionModel
