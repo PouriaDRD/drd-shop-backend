@@ -61,7 +61,7 @@ class DepositService:
         TransactionRepository.update_status(transaction, TransactionStatus.COMPLETED)
 
     @staticmethod
-    def reject_deposit(transaction: TransactionModel, admin_user):
+    def reject_deposit(transaction: TransactionModel):
         """
         Reject deposit request.
         """

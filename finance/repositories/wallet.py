@@ -1,4 +1,6 @@
+from django.db.models import Sum
 from django.db import transaction
+
 from accounts.models import UserModel
 from finance.models import WalletModel
 
@@ -20,5 +22,4 @@ class WalletRepository:
     @staticmethod
     def get_balance(wallet: WalletModel):
         result = wallet.ledger_entries.aggregate(balance=Sum("amount"))  # type: ignore
-
-        return int(result["balance"]) if result else 0
+        return int(result["balance"]) if result and not result["balance"] is None else 0

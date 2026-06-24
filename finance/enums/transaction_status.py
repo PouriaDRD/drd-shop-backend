@@ -11,3 +11,5 @@ class TransactionStatus(models.TextChoices):
     COMPLETED = "completed", "Completed"
 
     REJECTED = "rejected", "Rejected"
+
+    REFUNDED = "refunded", "Refunded"

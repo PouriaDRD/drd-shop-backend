@@ -1,6 +1,7 @@
 from typing import Optional
 from rest_framework.exceptions import ValidationError
 
+from finance.services import WalletService
 from accounts.repositories import UserRepository
 from accounts.utils import validate_iranian_mobile
 
@@ -23,7 +24,10 @@ class UserService:
         if email and UserRepository.get_by_email(email):
             raise ValidationError({"email": "User already exists."})
 
-        return UserRepository.create_user(phone_number, email, **extra_fields)
+        new_user = UserRepository.create_user(phone_number, email, **extra_fields)
+        wallet = WalletService.create_wallet(new_user)
+
+        return new_user
 
     @staticmethod
     def is_phone_valid(phone_number: str) -> bool:
