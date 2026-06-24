@@ -1,9 +1,12 @@
+from django.db import transaction
 from finance.models import LedgerEntryModel, TransactionModel, WalletModel
 
 
 class LedgerRepository:
+    """Repository for LedgerEntryModel."""
 
     @staticmethod
+    @transaction.atomic
     def create(
         amount: int,
         wallet: WalletModel,

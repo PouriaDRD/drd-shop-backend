@@ -3,7 +3,7 @@ import uuid
 from django.db import models
 
 from .wallet import WalletModel
-from finance.utils import (
+from finance.enums import (
     PaymentMethod,
     TransactionStatus,
     TransactionType,
