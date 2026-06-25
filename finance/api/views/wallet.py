@@ -1,20 +1,19 @@
+import logging
+from rest_framework.request import Request
 from rest_framework.generics import RetrieveAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.throttling import ScopedRateThrottle
 
+from config.utils import APIResponse
 from finance.models import WalletModel
 from finance.api.serializers import WalletSerializer
+
+logger = logging.getLogger("finance")
 
 
 class WalletRetrieveAPIView(RetrieveAPIView):
     """
     Retrieve authenticated user's wallet.
-
-    Methods:
-        GET
-
-    Permissions:
-        - Authenticated users only
     """
 
     http_method_names = ["get"]
@@ -28,10 +27,29 @@ class WalletRetrieveAPIView(RetrieveAPIView):
 
     def get_object(self) -> WalletModel:  # type: ignore
         """
-        Return current authenticated user's wallet.
+        Return wallet of authenticated user.
         """
 
-        user = self.request.user
-        wallet = getattr(user, "wallet", None)
+        wallet = getattr(self.request.user, "wallet", None)
 
         return wallet  # type: ignore
+
+    def get(self, request: Request, *args, **kwargs):
+        """
+        Return wallet data in standardized API response.
+        """
+        user = request.user
+        user_id = str(user.id)
+
+        wallet = self.get_object()
+        serializer = self.get_serializer(wallet)
+
+        logger.info(
+            "Wallet retrieved for user %s",
+            f"{user_id[:4]}*****{user_id[-2:]}",
+        )
+
+        return APIResponse.success(
+            data=serializer.data,
+            message="Wallet retrieved successfully.",
+        )

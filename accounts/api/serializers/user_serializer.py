@@ -17,5 +17,5 @@ class UserSerializer(serializers.ModelSerializer):
             "status",
             "last_login",
             "created_at",
-            "updated_at",
         )
+        read_only_fields = ["__all__"]

@@ -1,66 +1,46 @@
 import logging
-from rest_framework import status
-from rest_framework.views import APIView
+
 from rest_framework.request import Request
-from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
-from rest_framework.exceptions import ValidationError
+from rest_framework.generics import GenericAPIView
 from rest_framework.throttling import ScopedRateThrottle
 
+from config.utils import APIResponse
 from authentication.services import AuthService
 from authentication.api.serializers import RequestOTPSerializer
 
-logger = logging.getLogger()
+logger = logging.getLogger("authentication")
 
 
-class OTPRequestAPIView(APIView):
+class OTPRequestAPIView(GenericAPIView):
     """
-    API endpoint for requesting OTP.
+    Request OTP.
     """
 
     http_method_names = ["post"]
 
-    permission_classes = [AllowAny]
     serializer_class = RequestOTPSerializer
+
+    permission_classes = [AllowAny]
 
     throttle_scope = "request-otp"
     throttle_classes = [ScopedRateThrottle]
 
     def post(self, request: Request, *args, **kwargs):
-        try:
-            serializer = self.serializer_class(data=request.data)
-            serializer.is_valid(raise_exception=True)
+        serializer = self.get_serializer(data=request.data)
 
-            phone_number = serializer.validated_data["phone_number"]  # type: ignore
+        serializer.is_valid(raise_exception=True)
 
-            result = AuthService.request_otp(phone_number)
-            logger.info(f"OTP sent to {phone_number}")
-            return Response(
-                {
-                    "success": True,
-                    "message": f"OTP sent to {phone_number}.",
-                    "data": result,
-                },
-                status=status.HTTP_200_OK,
-            )
-        except ValidationError as e:
-            logger.error(f"Invalid OTP request: {e}")
-            return Response(
-                {
-                    "success": False,
-                    "message": "Error validating OTP request.",
-                    "errors": e.detail,
-                },
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+        phone_number: str = serializer.validated_data["phone_number"]
 
-        except Exception as e:
-            logger.error(f"Error requesting OTP: {e}")
-            return Response(
-                {
-                    "success": False,
-                    "message": "Error requesting OTP.",
-                    "errors": str(e),
-                },
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            )
+        result = AuthService.request_otp(phone_number)
+
+        logger.info(
+            "OTP requested phone=%s",
+            f"{phone_number[:4]}*****{phone_number[-2:]}",
+        )
+
+        return APIResponse.success(
+            data=result,
+            message="OTP sent successfully.",
+        )
