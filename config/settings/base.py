@@ -114,6 +114,7 @@ REST_FRAMEWORK = {
     "DEFAULT_THROTTLE_RATES": {
         "anon": "20/minute",
         "user": "40/minute",
+        "refresh-token": "5/minute",
         "request-otp": "20/minute",
         "verify-otp": "50/minute",
     },
