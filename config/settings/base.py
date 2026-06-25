@@ -115,8 +115,8 @@ REST_FRAMEWORK = {
         "anon": "20/minute",
         "user": "40/minute",
         "refresh-token": "5/minute",
-        "request-otp": "20/minute",
-        "verify-otp": "50/minute",
+        "request-otp": "2/minute",
+        "verify-otp": "5/minute",
     },
     "EXCEPTION_HANDLER": "config.utils.exceptions.custom_exception_handler",
 }
