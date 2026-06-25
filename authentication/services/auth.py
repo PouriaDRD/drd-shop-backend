@@ -1,19 +1,17 @@
 import logging
 import secrets
 from datetime import timedelta
-
+from django.db import transaction
 from django.utils import timezone
 from rest_framework.exceptions import ValidationError
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.settings import api_settings
 
-from config.settings.app_config import config
 
 from accounts.services import UserService
 from accounts.selectors import UserSelector
+from config.settings.app_config import config
 from accounts.repositories import UserRepository
-
-from authentication.models import OTPModel
-from authentication.selectors import OTPSelector
 from authentication.repositories import OTPRepository
 
 logger = logging.getLogger()
@@ -52,56 +50,24 @@ class AuthService:
         }
 
     @classmethod
+    @transaction.atomic
     def verify_otp(cls, otp_id: str, code: str, phone_number: str):
-        otp = OTPRepository.get_otp_by_id(otp_id)
+
+        # 1. SINGLE QUERY
+        otp = OTPRepository.select_for_update(otp_id)
 
         if not otp:
             raise ValidationError("Invalid OTP.")
 
-        cls._validate_otp(otp, code, phone_number)
-
-        user = UserRepository.get_by_phone(otp.phone_number)
-
-        if not user:
-            user = UserService.create_user(phone_number)
-
-            UserRepository.update_last_login(user)
-            refresh = RefreshToken.for_user(user)
-
-            return {
-                "access": str(refresh.access_token),
-                "refresh": str(refresh),
-                "is_active": True,
-                "registered": True,
-            }
-
-        else:
-            is_active = UserSelector.is_active(user)
-            if not is_active:
-                raise ValidationError("User not found or inactive.")
-            else:
-                UserRepository.update_last_login(user)
-                refresh = RefreshToken.for_user(user)
-
-                return {
-                    "access": str(refresh.access_token),
-                    "refresh": str(refresh),
-                    "is_active": True,
-                    "registered": False,
-                }
-
-    @classmethod
-    def _validate_otp(cls, otp: OTPModel, code, phone_number):
-        if otp.attempts >= cls.MAX_OTP_ATTEMPTS:
-            raise ValidationError("Too many attempts.")
-
+        # 2. fast validations (no DB calls)
         if otp.is_verified:
-            OTPRepository.increment_attempts(otp)
             raise ValidationError("OTP already used.")
 
-        if OTPSelector.is_expired(otp):
-            OTPRepository.increment_attempts(otp)
+        if otp.expires_at < timezone.now():
             raise ValidationError("OTP expired.")
+
+        if otp.attempts >= cls.MAX_OTP_ATTEMPTS:
+            raise ValidationError("Too many attempts.")
 
         if otp.phone_number != phone_number:
             OTPRepository.increment_attempts(otp)
@@ -111,8 +77,46 @@ class AuthService:
             OTPRepository.increment_attempts(otp)
             raise ValidationError("Wrong OTP.")
 
-        OTPRepository.increment_attempts(otp)
-        OTPRepository.mark_as_verified(otp)
+        # 3. mark verified ONCE
+        OTPRepository.mark_verified(otp)
+
+        # 4. get or create user (SINGLE PATH)
+        user = UserRepository.get_by_phone(phone_number)
+        is_new = False
+
+        if not user:
+            is_new = True
+            user = UserService.create_user(phone_number)
+
+        if not UserSelector.is_active(user):
+            raise ValidationError("User inactive.")
+
+        UserRepository.update_last_login(user)
+
+        # 5. tokens
+        tokens = cls._create_tokens(user)
+
+        return {
+            "tokens": tokens,
+            "is_new": is_new,
+        }
+
+    @classmethod
+    def _create_tokens(cls, user):
+        refresh = RefreshToken.for_user(user)
+
+        access_token = refresh.access_token
+
+        # Expiry calculation
+        access_expires = timezone.now() + api_settings.ACCESS_TOKEN_LIFETIME  # type: ignore
+        refresh_expires = timezone.now() + api_settings.REFRESH_TOKEN_LIFETIME  # type: ignore
+
+        return {
+            "access": str(access_token),
+            "refresh": str(refresh),
+            "access_expires_at": access_expires.isoformat(),
+            "refresh_expires_at": refresh_expires.isoformat(),
+        }
 
     @staticmethod
     def _send_otp(phone_number: str, code: str):

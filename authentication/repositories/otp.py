@@ -21,22 +21,18 @@ class OTPRepository:
         )
 
     @staticmethod
+    def select_for_update(otp_id: str):
+        return OTPModel.objects.select_for_update().filter(id=otp_id).first()
+
+    @staticmethod
     def get_otp_by_id(otp_id: str):
         """Get OTP by ID."""
         return OTPModel.objects.filter(id=otp_id).first()
 
     @staticmethod
     def increment_attempts(otp: OTPModel):
-        """
-        Safe increment attempts (race-condition safe).
-        """
-        OTPModel.objects.filter(id=otp.id).update(attempts=F("attempts") + 1)
-        otp.refresh_from_db()
-        return otp
+        OTPModel.objects.filter(id=otp.id).update(attempts=otp.attempts + 1)
 
     @staticmethod
-    def mark_as_verified(otp: OTPModel):
-        """Mark OTP as verified."""
-        otp.is_verified = True
-        otp.save(update_fields=["is_verified"])
-        return otp
+    def mark_verified(otp: OTPModel):
+        OTPModel.objects.filter(id=otp.id).update(is_verified=True)
