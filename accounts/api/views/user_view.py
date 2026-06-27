@@ -31,5 +31,5 @@ class UserAPIView(RetrieveAPIView):
 
         return APIResponse.success(
             data=serializer.data,
-            message="User data retrieved successfully.",
+            message="اطلاعات کاربر با موفقیت دریافت شد.",
         )

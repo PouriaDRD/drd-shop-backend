@@ -1,4 +1,3 @@
-import logging
 import secrets
 from datetime import timedelta
 from django.db import transaction
@@ -13,8 +12,6 @@ from accounts.selectors import UserSelector
 from config.settings.app_config import config
 from accounts.repositories import UserRepository
 from authentication.repositories import OTPRepository
-
-logger = logging.getLogger()
 
 
 class AuthService:
@@ -58,25 +55,25 @@ class AuthService:
         otp = OTPRepository.select_for_update(otp_id)
 
         if not otp:
-            raise ValidationError("Invalid OTP.")
+            raise ValidationError("کد یکبار مصرف معتبر نیست.")
 
         # 2. fast validations (no DB calls)
         if otp.is_verified:
-            raise ValidationError("OTP already used.")
+            raise ValidationError("کد یکبار مصرف قبلا تایید شده است.")
 
         if otp.expires_at < timezone.now():
-            raise ValidationError("OTP expired.")
+            raise ValidationError("کد یکبار مصرف منقضی شده است.")
 
         if otp.attempts >= cls.MAX_OTP_ATTEMPTS:
-            raise ValidationError("Too many attempts.")
+            raise ValidationError("کد یکبار مصرف منقضی شده است.")
 
         if otp.phone_number != phone_number:
             OTPRepository.increment_attempts(otp)
-            raise ValidationError("Phone mismatch.")
+            raise ValidationError("شماره تلفن مورد نظر مطابقت ندارد.")
 
         if otp.code != code.strip():
             OTPRepository.increment_attempts(otp)
-            raise ValidationError("Wrong OTP.")
+            raise ValidationError("کد نادرست می باشد.")
 
         # 3. mark verified ONCE
         OTPRepository.mark_verified(otp)

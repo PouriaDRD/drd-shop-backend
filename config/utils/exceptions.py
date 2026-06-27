@@ -23,7 +23,7 @@ def custom_exception_handler(exc, context):
 
         return APIResponse.error(
             errors=response.data,
-            message="Request failed.",
+            message="درخواست ناموفق بود.",
             status_code=response.status_code,
         )
 
@@ -34,6 +34,6 @@ def custom_exception_handler(exc, context):
 
     return APIResponse.error(
         errors="Internal server error.",
-        message="Unexpected error.",
+        message="خطای غیرمنتظره رخ داد.",
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
     )

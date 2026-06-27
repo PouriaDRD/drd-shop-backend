@@ -42,5 +42,5 @@ class OTPRequestAPIView(GenericAPIView):
 
         return APIResponse.success(
             data=result,
-            message="OTP sent successfully.",
+            message="کد یکبار مصرف با موفقیت ارسال شد.",
         )

@@ -51,5 +51,5 @@ class WalletRetrieveAPIView(RetrieveAPIView):
 
         return APIResponse.success(
             data=serializer.data,
-            message="Wallet retrieved successfully.",
+            message="کیف پول با موفقیت دریافت شد.",
         )

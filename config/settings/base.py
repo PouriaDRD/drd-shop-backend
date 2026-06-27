@@ -144,11 +144,12 @@ SIMPLE_JWT = {
 
 
 # ---------------------------------------------------------------
-# Logging Configuration
+# Logging Configuration (FIXED)
 # ---------------------------------------------------------------
 
 LOG_DIR = BASE_DIR / "logs"
 LOG_DIR.mkdir(parents=True, exist_ok=True)
+
 
 LOGGING = {
     "version": 1,
@@ -174,6 +175,7 @@ LOGGING = {
     },
     # -----------------------------------------------------------
     # Handlers
+    # (FIX: replace TimedRotatingFileHandler -> WatchedFileHandler)
     # -----------------------------------------------------------
     "handlers": {
         "console": {
@@ -181,47 +183,33 @@ LOGGING = {
             "formatter": "verbose",
         },
         "django_file": {
-            "class": "logging.handlers.TimedRotatingFileHandler",
+            "class": "logging.handlers.WatchedFileHandler",
             "filename": LOG_DIR / "django.log",
-            "when": "midnight",
-            "backupCount": 30,
             "formatter": "verbose",
         },
         "error_file": {
-            "class": "logging.handlers.TimedRotatingFileHandler",
+            "class": "logging.handlers.WatchedFileHandler",
             "filename": LOG_DIR / "errors.log",
-            "when": "midnight",
-            "backupCount": 60,
             "formatter": "verbose",
-            "level": "ERROR",
         },
         "security_file": {
-            "class": "logging.handlers.TimedRotatingFileHandler",
+            "class": "logging.handlers.WatchedFileHandler",
             "filename": LOG_DIR / "security.log",
-            "when": "midnight",
-            "backupCount": 60,
             "formatter": "verbose",
-            "level": "WARNING",
         },
         "accounts_file": {
-            "class": "logging.handlers.TimedRotatingFileHandler",
+            "class": "logging.handlers.WatchedFileHandler",
             "filename": LOG_DIR / "accounts.log",
-            "when": "midnight",
-            "backupCount": 30,
             "formatter": "verbose",
         },
         "authentication_file": {
-            "class": "logging.handlers.TimedRotatingFileHandler",
+            "class": "logging.handlers.WatchedFileHandler",
             "filename": LOG_DIR / "authentication.log",
-            "when": "midnight",
-            "backupCount": 30,
             "formatter": "verbose",
         },
         "finance_file": {
-            "class": "logging.handlers.TimedRotatingFileHandler",
+            "class": "logging.handlers.WatchedFileHandler",
             "filename": LOG_DIR / "finance.log",
-            "when": "midnight",
-            "backupCount": 30,
             "formatter": "verbose",
         },
     },
@@ -229,10 +217,7 @@ LOGGING = {
     # Root Logger
     # -----------------------------------------------------------
     "root": {
-        "handlers": [
-            "console",
-            "error_file",
-        ],
+        "handlers": ["console", "error_file"],
         "level": "INFO",
     },
     # -----------------------------------------------------------
@@ -240,48 +225,32 @@ LOGGING = {
     # -----------------------------------------------------------
     "loggers": {
         "django": {
-            "handlers": [
-                "django_file",
-                "console",
-            ],
+            "handlers": ["django_file", "console"],
             "level": "INFO",
             "propagate": False,
         },
         "django.request": {
-            "handlers": [
-                "error_file",
-            ],
+            "handlers": ["error_file"],
             "level": "ERROR",
             "propagate": False,
         },
         "django.security": {
-            "handlers": [
-                "security_file",
-            ],
+            "handlers": ["security_file"],
             "level": "WARNING",
             "propagate": False,
         },
         "accounts": {
-            "handlers": [
-                "accounts_file",
-                "console",
-            ],
+            "handlers": ["accounts_file", "console"],
             "level": "INFO",
             "propagate": False,
         },
         "authentication": {
-            "handlers": [
-                "authentication_file",
-                "console",
-            ],
+            "handlers": ["authentication_file", "console"],
             "level": "INFO",
             "propagate": False,
         },
         "finance": {
-            "handlers": [
-                "finance_file",
-                "console",
-            ],
+            "handlers": ["finance_file", "console"],
             "level": "INFO",
             "propagate": False,
         },

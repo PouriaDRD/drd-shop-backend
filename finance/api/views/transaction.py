@@ -57,5 +57,5 @@ class TransactionListAPIView(ListAPIView):
 
         return APIResponse.success(
             data=serializer.data,
-            message="Transactions retrieved successfully.",
+            message="تراکنش های کیف پول با موفقیت دریافت شد.",
         )

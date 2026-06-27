@@ -47,5 +47,5 @@ class OTPVerifyAPIView(GenericAPIView):
 
         return APIResponse.success(
             data=result,
-            message="OTP verified successfully.",
+            message="کد یکبار مصرف با موفقیت تایید شد.",
         )
