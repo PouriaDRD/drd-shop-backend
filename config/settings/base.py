@@ -30,7 +30,7 @@ INSTALLED_APPS = [
     "django_cleanup.apps.CleanupSelectedConfig",
     # Custom apps
     "accounts",
-    # "authentication",
+    "authentication",
     # "finance",
 ]
 
@@ -112,11 +112,13 @@ REST_FRAMEWORK = {
         "rest_framework.throttling.ScopedRateThrottle",
     ],
     "DEFAULT_THROTTLE_RATES": {
-        "anon": "20/minute",
-        "user": "40/minute",
+        "anon": "15/minute",
+        "user": "30/minute",
+        "login": "5/minute",
+        "register": "5/minute",
+        "otp-send": "5/minute",
+        "otp-verify": "5/minute",
         "refresh-token": "5/minute",
-        "request-otp": "2/minute",
-        "verify-otp": "5/minute",
     },
     "EXCEPTION_HANDLER": "config.utils.exceptions.custom_exception_handler",
 }
@@ -147,112 +149,28 @@ SIMPLE_JWT = {
 # Logging Configuration (FIXED)
 # ---------------------------------------------------------------
 
-LOG_DIR = BASE_DIR / "logs"
-LOG_DIR.mkdir(parents=True, exist_ok=True)
+# LOG_DIR = BASE_DIR / "logs"
+# LOG_DIR.mkdir(parents=True, exist_ok=True)
 
 
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
-    # -----------------------------------------------------------
-    # Formatters
-    # -----------------------------------------------------------
     "formatters": {
-        "verbose": {
-            "format": (
-                "[{asctime}] "
-                "[{levelname}] "
-                "[{name}] "
-                "{module}:{lineno} "
-                "{message}"
-            ),
-            "style": "{",
-        },
         "simple": {
-            "format": "[{levelname}] {message}",
+            "format": "[{asctime}] [{levelname}] [{name}] {message}",
             "style": "{",
+            "datefmt": "%d/%b/%Y %H:%M:%S",
         },
     },
-    # -----------------------------------------------------------
-    # Handlers
-    # (FIX: replace TimedRotatingFileHandler -> WatchedFileHandler)
-    # -----------------------------------------------------------
     "handlers": {
         "console": {
             "class": "logging.StreamHandler",
-            "formatter": "verbose",
-        },
-        "django_file": {
-            "class": "logging.handlers.WatchedFileHandler",
-            "filename": LOG_DIR / "django.log",
-            "formatter": "verbose",
-        },
-        "error_file": {
-            "class": "logging.handlers.WatchedFileHandler",
-            "filename": LOG_DIR / "errors.log",
-            "formatter": "verbose",
-        },
-        "security_file": {
-            "class": "logging.handlers.WatchedFileHandler",
-            "filename": LOG_DIR / "security.log",
-            "formatter": "verbose",
-        },
-        "accounts_file": {
-            "class": "logging.handlers.WatchedFileHandler",
-            "filename": LOG_DIR / "accounts.log",
-            "formatter": "verbose",
-        },
-        "authentication_file": {
-            "class": "logging.handlers.WatchedFileHandler",
-            "filename": LOG_DIR / "authentication.log",
-            "formatter": "verbose",
-        },
-        "finance_file": {
-            "class": "logging.handlers.WatchedFileHandler",
-            "filename": LOG_DIR / "finance.log",
-            "formatter": "verbose",
+            "formatter": "simple",
         },
     },
-    # -----------------------------------------------------------
-    # Root Logger
-    # -----------------------------------------------------------
     "root": {
-        "handlers": ["console", "error_file"],
+        "handlers": ["console"],
         "level": "INFO",
-    },
-    # -----------------------------------------------------------
-    # Loggers
-    # -----------------------------------------------------------
-    "loggers": {
-        "django": {
-            "handlers": ["django_file", "console"],
-            "level": "INFO",
-            "propagate": False,
-        },
-        "django.request": {
-            "handlers": ["error_file"],
-            "level": "ERROR",
-            "propagate": False,
-        },
-        "django.security": {
-            "handlers": ["security_file"],
-            "level": "WARNING",
-            "propagate": False,
-        },
-        "accounts": {
-            "handlers": ["accounts_file", "console"],
-            "level": "INFO",
-            "propagate": False,
-        },
-        "authentication": {
-            "handlers": ["authentication_file", "console"],
-            "level": "INFO",
-            "propagate": False,
-        },
-        "finance": {
-            "handlers": ["finance_file", "console"],
-            "level": "INFO",
-            "propagate": False,
-        },
     },
 }

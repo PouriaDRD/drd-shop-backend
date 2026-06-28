@@ -1,3 +1,5 @@
-from .verify_otp import VerifyOTPSerializer
-from .request_otp import RequestOTPSerializer
+from .login import LoginSerializer
+from .register import RegisterSerializer
 from .refresh import CustomTokenRefreshSerializer
+from .send_login_otp import SendLoginOTPSerializer
+from .verify_login_otp import VerifyLoginOTPSerializer

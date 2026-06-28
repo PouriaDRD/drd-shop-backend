@@ -1,38 +1,59 @@
-from django.db.models import F
+from typing import Optional
+from datetime import timedelta
+
+from django.utils import timezone
+from django.db.models import F, Q
 from django.db import transaction
 
+from authentication.enums import OTPType
 from authentication.models import OTPModel
-from accounts.utils import normalize_iranian_mobile
+from config.settings.app_config import config
 
 
 class OTPRepository:
-    """
-    OTP database operations only.
-    """
+    """Repository layer for OTP-related DB operations."""
+
+    OTP_TTL_MINUTES = config.auth.otp_ttl_minutes
 
     @staticmethod
     @transaction.atomic
-    def create_otp_code(phone_number: str, code: str, expires_at):
-        """Create OTP record."""
-        return OTPModel.objects.create(
-            phone_number=normalize_iranian_mobile(phone_number),
-            code=code,
-            expires_at=expires_at,
+    def create_otp(
+        email: str, otp_type: OTPType, salt: str, code_hash: str
+    ) -> OTPModel:
+        """Create new OTP for email."""
+        qs = OTPModel.objects.create(
+            email=email, otp_type=otp_type, salt=salt, code_hash=code_hash
         )
+        return qs
 
     @staticmethod
-    def select_for_update(otp_id: str):
-        return OTPModel.objects.select_for_update().filter(id=otp_id).first()
+    def delete_expired_otp(email: str):
+        """Delete expired or used OTPs for email."""
+        OTPModel.objects.filter(email=email).filter(
+            Q(is_used=True)
+            | Q(
+                created_at__lt=timezone.now()
+                - timedelta(minutes=OTPRepository.OTP_TTL_MINUTES)
+            )
+        ).delete()
 
     @staticmethod
-    def get_otp_by_id(otp_id: str):
-        """Get OTP by ID."""
-        return OTPModel.objects.filter(id=otp_id).first()
+    def get_active_otp(email: str, otp_type) -> Optional[OTPModel]:
+        """Get active OTP for email and otp_type."""
+        qs = OTPModel.objects.filter(
+            email=email, otp_type=otp_type, is_used=False
+        ).first()
+        return qs
 
     @staticmethod
     def increment_attempts(otp: OTPModel):
-        OTPModel.objects.filter(id=otp.id).update(attempts=otp.attempts + 1)
+        """Increment attempts by 1 for OTP."""
+        OTPModel.objects.filter(pk=otp.pk).update(attempts=F("attempts") + 1)
+        otp.refresh_from_db(fields=["attempts"])
 
     @staticmethod
-    def mark_verified(otp: OTPModel):
-        OTPModel.objects.filter(id=otp.id).update(is_verified=True)
+    def mark_used(otp: OTPModel):
+        """Mark OTP as used."""
+        if not otp.is_used:
+            otp.is_used = True
+            otp.save(update_fields=["is_used"])

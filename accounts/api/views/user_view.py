@@ -1,13 +1,14 @@
 import logging
+from rest_framework import status
 from rest_framework.request import Request
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.generics import RetrieveAPIView
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.throttling import ScopedRateThrottle
 
 from config.utils import APIResponse
 from accounts.api.serializers import UserSerializer
 
-logger = logging.getLogger("accounts")
+logger = logging.getLogger("accounts.user")
 
 
 class UserAPIView(RetrieveAPIView):
@@ -25,11 +26,19 @@ class UserAPIView(RetrieveAPIView):
     throttle_classes = [ScopedRateThrottle]
 
     def get(self, request: Request, *args, **kwargs):
-        serializer = self.serializer_class(request.user)
+        try:
+            serializer = self.serializer_class(request.user)
 
-        logger.info("User data retrieved")
+            logger.info("User data retrieved")
 
-        return APIResponse.success(
-            data=serializer.data,
-            message="اطلاعات کاربر با موفقیت دریافت شد.",
-        )
+            return APIResponse.success(
+                data=serializer.data,
+                message="اطلاعات کاربر با موفقیت دریافت شد.",
+            )
+
+        except Exception as e:
+            logger.error(f"Error retrieving user: {e}")
+            return APIResponse.error(
+                message=f"خطا در دریافت اطلاعات کاربر",
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )

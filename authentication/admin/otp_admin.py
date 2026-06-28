@@ -1,62 +1,55 @@
 from django.contrib import admin
-from django.utils.html import format_html
+from django.utils.timezone import localtime
 
 from authentication.models import OTPModel
 from authentication.selectors import OTPSelector
+from authentication.repositories import OTPRepository
 
 
 @admin.register(OTPModel)
 class OTPAdmin(admin.ModelAdmin):
-    """
-    Admin interface for OTP records.
-    """
 
     list_display = (
-        "phone_number",
-        "code",
+        "email",
+        "otp_type",
+        "is_used",
         "attempts",
         "remaining_attempts_display",
         "status_display",
-        "is_verified",
-        "is_expired",
-        "expires_at",
+        "expire_at_display",
         "created_at",
     )
 
-    search_fields = ("phone_number",)
-
-    list_filter = (
-        "is_verified",
-        "created_at",
-    )
-
-    ordering = ("-created_at",)
-
-    date_hierarchy = "created_at"
-
-    list_per_page = 25
+    search_fields = ("email",)
+    list_filter = ("otp_type", "is_used", "created_at")
 
     readonly_fields = (
         "id",
-        "phone_number",
-        "code",
-        "is_verified",
+        "email",
+        "otp_type",
+        "salt",
+        "code_hash",
+        "is_used",
         "attempts",
-        "expires_at",
         "created_at",
+        "updated_at",
         "status_display",
         "remaining_attempts_display",
+        "expire_at_display",
     )
+
+    ordering = ("-created_at",)
+    date_hierarchy = "created_at"
+    list_per_page = 25
 
     fieldsets = (
         (
             "OTP Information",
             {
                 "fields": (
-                    "id",
-                    "phone_number",
-                    "code",
-                    "is_verified",
+                    "email",
+                    "otp_type",
+                    "is_used",
                     "attempts",
                     "remaining_attempts_display",
                     "status_display",
@@ -64,77 +57,60 @@ class OTPAdmin(admin.ModelAdmin):
             },
         ),
         (
-            "Expiration",
+            "Security Details",
+            {
+                "fields": ("salt", "code_hash"),
+                "classes": ("collapse",),
+            },
+        ),
+        (
+            "Timestamps",
             {
                 "fields": (
-                    "expires_at",
                     "created_at",
+                    "updated_at",
+                    "expire_at_display",
                 ),
             },
         ),
     )
 
-    actions = ("delete_expired_otps",)
-
-    # -------------------------------------
-    # Custom Fields
-    # -------------------------------------
-
-    @admin.display(description="Status")
     def status_display(self, obj):
-        if obj.is_verified:
-            return format_html(
-                '<span style="color:{};">{}</span>',
-                "#7f8c8d",
-                "Verified",
-            )
-
+        if obj.is_used:
+            return "Used"
         if OTPSelector.is_expired(obj):
-            return format_html(
-                '<span style="color:{};">{}</span>',
-                "#e74c3c",
-                "Expired",
-            )
+            return "Expired"
+        return "Active"
 
-        return format_html(
-            '<span style="color:{};">{}</span>',
-            "#27ae60",
-            "Active",
-        )
+    status_display.short_description = "Status"  # type: ignore
 
-    @admin.display(description="Attempts Left")
-    def remaining_attempts_display(self, obj: OTPModel):
-        """
-        Display remaining verification attempts.
-        """
+    def remaining_attempts_display(self, obj):
+        return OTPSelector.remaining_attempts(obj) or 0
 
-        return OTPSelector.remaining_attempts(obj)
+    remaining_attempts_display.short_description = "Attempts Left"  # type: ignore
 
-    # -------------------------------------
-    # Actions
-    # -------------------------------------
+    def expire_at_display(self, obj):
+        value = OTPSelector.expire_at(obj)
+        if not value:
+            return "-"
+        return localtime(value).strftime("%Y-%m-%d %H:%M:%S")
+
+    expire_at_display.short_description = "Expires At"  # type: ignore
+
+    actions = ["mark_as_used", "delete_expired"]
+
+    @admin.action(description="Mark selected OTPs as used")
+    def mark_as_used(self, request, queryset):
+        for otp in queryset:
+            OTPRepository.mark_used(otp)
+        self.message_user(request, "Done")
 
     @admin.action(description="Delete expired OTPs")
-    def delete_expired_otps(self, request, queryset):
-        """
-        Delete selected expired OTP records.
-        """
-
-        expired_otps = [otp for otp in queryset if OTPSelector.is_expired(otp)]
-
-        deleted_count = len(expired_otps)
-
-        for otp in expired_otps:
-            otp.delete()
-
-        self.message_user(request, f"{deleted_count} expired OTP(s) deleted.")
-
-    # -------------------------------------
-    # Permissions
-    # -------------------------------------
+    def delete_expired(self, request, queryset):
+        for otp in queryset:
+            if OTPSelector.is_expired(otp):
+                otp.delete()
+        self.message_user(request, "Done")
 
     def has_add_permission(self, request):
-        """
-        Prevent manual OTP creation.
-        """
         return False

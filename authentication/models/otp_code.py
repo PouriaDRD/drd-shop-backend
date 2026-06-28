@@ -1,47 +1,52 @@
 import uuid
 from django.db import models
-from django.utils import timezone
-from accounts.utils import validate_iranian_mobile, normalize_iranian_mobile
+from django.db.models import Q
+from authentication.enums import OTPType
+from django.core.validators import EmailValidator
 
 
 class OTPModel(models.Model):
-    """
-    OTP storage model.
-
-    Security features:
-    - expiration time
-    - attempt tracking
-    """
+    """Secure OTP model supporting email."""
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
-    phone_number = models.CharField(
-        max_length=11,
-        validators=[validate_iranian_mobile],
+    email = models.EmailField(
+        null=False,
+        blank=False,
+        validators=[EmailValidator(message="Enter a valid email address.")],
+        help_text="Target email for OTP delivery.",
     )
 
-    code = models.CharField(max_length=6)
+    otp_type = models.CharField(
+        max_length=61,
+        choices=OTPType.choices,
+        default=OTPType.LOGIN,
+        help_text="Purpose of the OTP (login, register, etc.).",
+    )
 
-    is_verified = models.BooleanField(default=False)
+    salt = models.CharField(max_length=255)
+    code_hash = models.CharField(max_length=255)
+
+    is_used = models.BooleanField(default=False)
     attempts = models.PositiveSmallIntegerField(default=0)
 
-    expires_at = models.DateTimeField()
+    updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        db_table = "otp_codes"
-        ordering = ["-created_at"]
-
         verbose_name = "OTP Code"
         verbose_name_plural = "OTP Codes"
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["email"]),
+        ]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["email", "otp_type", "is_used"],
+                name="unique_active_otp_per_email_type",
+                condition=Q(is_used=False),
+            )
+        ]
 
     def __str__(self):
-        return f"{self.phone_number} | {self.code}"
-
-    def save(self, *args, **kwargs):
-        self.phone_number = normalize_iranian_mobile(self.phone_number)
-        super().save(*args, **kwargs)
-
-    @property
-    def is_expired(self) -> bool:
-        return timezone.now() > self.expires_at
+        return f"OTP for {self.email} ({self.otp_type})"
