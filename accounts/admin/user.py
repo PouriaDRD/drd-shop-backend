@@ -14,8 +14,8 @@ class UserAdmin(BaseUserAdmin):
 
     list_display = [
         # basic information
-        "phone_number",
         "email",
+        "email_verified",
         # permissions
         "role",
         "status",
@@ -26,11 +26,11 @@ class UserAdmin(BaseUserAdmin):
     ]
 
     search_fields = [
-        "phone_number",
         "email",
     ]
 
     list_filter = [
+        "email_verified",
         "role",
         "status",
     ]
@@ -41,6 +41,8 @@ class UserAdmin(BaseUserAdmin):
 
     readonly_fields = [
         "id",
+        "role",
+        "is_superuser",
         "last_login",
         "updated_at",
         "created_at",
@@ -52,8 +54,9 @@ class UserAdmin(BaseUserAdmin):
             {
                 "classes": ("wide",),
                 "fields": (
-                    "phone_number",
                     "email",
+                    "role",
+                    "status",
                     "password1",
                     "password2",
                 ),
@@ -67,7 +70,6 @@ class UserAdmin(BaseUserAdmin):
             {
                 "fields": (
                     "id",
-                    "phone_number",
                     "email",
                     "password",
                 ),
@@ -77,8 +79,10 @@ class UserAdmin(BaseUserAdmin):
             "Role & Status",
             {
                 "fields": (
+                    "email_verified",
                     "role",
                     "status",
+                    "is_superuser",
                 ),
             },
         ),

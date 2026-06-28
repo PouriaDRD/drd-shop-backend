@@ -5,108 +5,72 @@ from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 
 from .user_manager import UserManager
 from accounts.enums import UserRole, UserStatus
-from accounts.utils import normalize_iranian_mobile, validate_iranian_mobile
 
 
 class UserModel(AbstractBaseUser, PermissionsMixin):
     """
-    Custom User model using phone number authentication.
+    Custom user model that replaces Django's default user model.
     """
 
-    id = models.UUIDField(
-        primary_key=True,
-        default=uuid.uuid4,
-        editable=False,
-    )
-
-    phone_number = models.CharField(
-        max_length=11,
-        unique=True,
-        db_index=True,
-        validators=[validate_iranian_mobile],
-    )
-
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    # Email is required for user creation and must be unique
     email = models.EmailField(
         unique=True,
-        null=True,
-        blank=True,
         validators=[
             EmailValidator(
-                message="Enter a valid email address.",
+                message="ایمل وارد شده معتبر نیست.",
                 code="invalid_email",
             )
         ],
-        help_text="Enter a valid email address.",
+        help_text="یک ایمیل معتبر وارد کنید.",
     )
-
+    email_verified = models.BooleanField(default=False)
+    # Status for the user (active, banned, deleted)
     status = models.CharField(
         max_length=20,
         choices=UserStatus.choices,
         default=UserStatus.ACTIVE,
         db_index=True,
     )
-
+    # Role for the user (admin, user, menu owner)
     role = models.CharField(
         max_length=20,
         choices=UserRole.choices,
         default=UserRole.USER,
         db_index=True,
     )
-
+    # Timestamps for user creation and last update
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
-    # Custom manager
+    # Attach the custom manager
     objects = UserManager()
 
-    # Authentication field
-    USERNAME_FIELD = "phone_number"
-    REQUIRED_FIELDS = []
+    # Set the USERNAME_FIELD to 'email' for login
+    USERNAME_FIELD = "email"
 
-    # Permissions
     @property
-    def is_active(self):  # type: ignore
+    def is_staff(self) -> bool:
+        """Check if the user is staff."""
+        result: bool = (
+            self.is_superuser
+            or self.role == UserRole.ADMIN
+            or self.role == UserRole.SUPERUSER
+        )
+        return result
+
+    @property
+    def is_active(self) -> bool:  # type: ignore
+        """Check if the user is active."""
         return self.status == UserStatus.ACTIVE
 
-    @property
-    def is_staff(self):
-        return self.is_superuser or self.role == UserRole.ADMIN
-
-    @property
-    def is_superuser(self):
-        return self.role == UserRole.SUPERUSER
-
     def __str__(self) -> str:
-        """
-        String representation of user.
-        """
-
-        return str(self.phone_number or self.email or self.id)
+        """String representation of the user."""
+        return self.email
 
     class Meta:
-        """
-        Database metadata for UserModel.
-        """
+        """Meta class for the UserModel."""
 
-        db_table = "users"
         verbose_name = "User"
         verbose_name_plural = "Users"
         ordering = ("-created_at",)
-
-    def clean(self):
-        """
-        Normalize data before validation.
-        """
-
-        # Normalize phone number before saving
-        self.phone_number = normalize_iranian_mobile(self.phone_number)
-
-        super().clean()
-
-    def save(self, *args, **kwargs):
-        """
-        Ensure full validation before saving.
-        """
-
-        self.full_clean()
-        return super().save(*args, **kwargs)

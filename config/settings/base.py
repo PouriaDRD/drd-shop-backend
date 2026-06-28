@@ -30,8 +30,8 @@ INSTALLED_APPS = [
     "django_cleanup.apps.CleanupSelectedConfig",
     # Custom apps
     "accounts",
-    "authentication",
-    "finance",
+    # "authentication",
+    # "finance",
 ]
 
 # ---------------------------------------------------------------

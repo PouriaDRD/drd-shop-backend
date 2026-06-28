@@ -1,10 +1,8 @@
 from typing import Optional
 from django.db import transaction
 from django.utils import timezone
-
 from accounts.models import UserModel
 from accounts.enums import UserRole, UserStatus
-from accounts.utils import normalize_iranian_mobile
 
 
 class UserRepository:
@@ -16,11 +14,7 @@ class UserRepository:
 
     @staticmethod
     @transaction.atomic
-    def create_user(
-        phone_number: str,
-        email: Optional[str] = None,
-        **kwargs,
-    ) -> UserModel:
+    def create_user(email: str, password: Optional[str] = None, **kwargs) -> UserModel:
         """
         Create a new user in DB.
 
@@ -29,30 +23,24 @@ class UserRepository:
         - persist user
         """
 
-        phone_number = normalize_iranian_mobile(phone_number)
+        email = email.lower().strip()
 
-        if email:
-            email = email.lower().strip()
-
-        return UserModel.objects.create_user(  # type: ignore
-            phone_number=phone_number,
+        new_user = UserModel.objects.create_user(  # type: ignore
             email=email,
+            email_verified=False,
             role=UserRole.USER,
             status=UserStatus.ACTIVE,
+            password=password,
             **kwargs,
         )
+
+        return new_user
 
     @staticmethod
     def get_by_email(email: str) -> Optional[UserModel]:
         """Fetch user by email."""
-        return UserModel.objects.filter(email=email.lower().strip()).first()
-
-    @staticmethod
-    def get_by_phone(phone_number: str) -> Optional[UserModel]:
-        """Fetch user by phone number."""
-        return UserModel.objects.filter(
-            phone_number=normalize_iranian_mobile(phone_number)
-        ).first()
+        result = UserModel.objects.filter(email=email.lower().strip()).first()
+        return result
 
     @staticmethod
     def update_password(user: UserModel, new_password: str) -> UserModel:

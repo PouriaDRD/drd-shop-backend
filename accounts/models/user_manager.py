@@ -1,78 +1,49 @@
-from django.contrib.auth.base_user import BaseUserManager
-
+from typing import Optional
+from django.contrib.auth.models import BaseUserManager
 from accounts.enums import UserRole, UserStatus
-from accounts.utils import normalize_iranian_mobile, validate_iranian_mobile
 
 
 class UserManager(BaseUserManager):
-    """
-    Custom user manager using phone_number as USERNAME_FIELD.
-    Supports optional password (e.g. OTP-based auth).
-    """
+    """Custom manager for the UserModel, handling user and superuser creation."""
 
-    def _create_user(self, phone_number, password=None, **extra_fields):
-        """
-        Internal method to create a user with optional password.
-        """
+    def create_user(self, email: str, password: Optional[str] = None, **extra_fields):
+        """Create a new user with the given email and password."""
 
-        # Validate required field
-        if not phone_number:
-            raise ValueError("Phone number is required")
+        if not email:
+            raise ValueError("ایمیل مورد نظر وارد نشده است.")
 
-        # Normalize phone number
-        phone_number = normalize_iranian_mobile(phone_number)
+        # Normalize email
+        email = self.normalize_email(email)
 
-        if phone_number is None:
-            raise ValueError("Invalid phone number")
-
-        # Validate format
-        validate_iranian_mobile(phone_number)
-
-        # Create user instance
         user = self.model(
-            phone_number=phone_number,
-            **extra_fields,
+            email=email,
+            email_verified=False,
+            is_superuser=False,
+            role=UserRole.USER,
+            status=UserStatus.ACTIVE,
+            **extra_fields
         )
 
-        # OPTIONAL PASSWORD HANDLING
         if password:
             user.set_password(password)
         else:
-            user.set_unusable_password()
+            user.set_unusable_password()  # for OAuth cases
 
-        # Validate model
-        user.full_clean()
-
-        # Save user
         user.save(using=self._db)
 
         return user
 
-    def create_user(self, phone_number, password=None, **extra_fields):
-        """
-        Create a normal user (password optional).
-        """
+    def create_superuser(
+        self, email: str, password: Optional[str] = None, **extra_fields
+    ):
+        """Create a new superuser with the given email and password."""
+        user = self.create_user(email=email, password=password, **extra_fields)
 
-        extra_fields.setdefault("status", UserStatus.ACTIVE)
-        extra_fields.setdefault("role", UserRole.USER)
+        # Set the user role to admin and status to active
+        user.is_superuser = True
+        user.role = UserRole.SUPERUSER
+        user.status = UserStatus.ACTIVE
 
-        return self._create_user(phone_number, password, **extra_fields)
+        user.save(using=self._db)
 
-    def create_superuser(self, phone_number, password=None, **extra_fields):
-        """
-        Create a superuser (password required).
-        """
-
-        extra_fields.setdefault("status", UserStatus.ACTIVE)
-        extra_fields.setdefault("role", UserRole.SUPERUSER)
-
-        if not password:
-            raise ValueError("Superuser must have a password")
-
-        if extra_fields.get("role") != UserRole.SUPERUSER:
-            raise ValueError("Superuser must have role=SUPERUSER")
-
-        if extra_fields.get("status") != UserStatus.ACTIVE:
-            raise ValueError("Superuser must have status=ACTIVE")
-
-        return self._create_user(phone_number, password, **extra_fields)
+        return user
