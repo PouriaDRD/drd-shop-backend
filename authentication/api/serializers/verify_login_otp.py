@@ -1,5 +1,6 @@
 from rest_framework import serializers
 
+from authentication.enums import OTPType
 from authentication.services.auth import AuthService
 from authentication.exceptions import (
     UserNotFoundError,
@@ -12,14 +13,16 @@ class VerifyLoginOTPSerializer(serializers.Serializer):
 
     email = serializers.EmailField()
     code = serializers.CharField()
+    otp_type = serializers.ChoiceField(choices=OTPType.choices, default=OTPType.LOGIN)
 
     def validate(self, attrs):
 
         email = attrs["email"]
         code = attrs["code"]
+        otp_type = attrs["otp_type"]
 
         try:
-            result = AuthService.verify_login_otp(email, code)
+            result = AuthService.verify_login_otp(email, code, otp_type)
         except InvalidOTPError:
             raise serializers.ValidationError(
                 {"code": "کد وارد شده اشتباه یا منقضی شده است"}

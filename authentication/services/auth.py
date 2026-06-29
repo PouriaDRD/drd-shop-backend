@@ -58,11 +58,11 @@ class AuthService:
         }
 
     @classmethod
-    def verify_login_otp(cls, email: str, code: str):
+    def verify_login_otp(cls, email: str, code: str, otp_type: OTPType = OTPType.LOGIN):
 
         email = email.strip().lower()
 
-        is_valid = OTPService.verify_otp(email, code, OTPType.LOGIN)
+        is_valid = OTPService.verify_otp(email, code, otp_type)
 
         if not is_valid:
             raise InvalidOTPError()
