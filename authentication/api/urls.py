@@ -14,8 +14,8 @@ urlpatterns = [
     path("login/", LoginAPIView.as_view(), name="login"),
     path("register/", RegisterAPIView.as_view(), name="register"),
     # OTP login
-    path("otp/send/", SendLoginOTPAPIView.as_view(), name="otp-send"),
-    path("otp/verify/", VerifyLoginOTPAPIView.as_view(), name="otp-verify"),
+    path("request-otp/", SendLoginOTPAPIView.as_view(), name="request-otp"),
+    path("verify-otp/", VerifyLoginOTPAPIView.as_view(), name="verify-otp"),
     # Refresh token
     path("refresh/", TokenRefreshAPIView.as_view(), name="refresh-token"),
 ]

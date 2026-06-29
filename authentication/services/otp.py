@@ -4,7 +4,6 @@ from django.db import transaction
 from authentication.enums import OTPType
 from config.settings.app_config import config
 from authentication.selectors import OTPSelector
-from authentication.exceptions import OTPExistsError
 from authentication.repositories import OTPRepository
 
 
@@ -32,7 +31,7 @@ class OTPService:
         pending_otp = OTPRepository.get_active_otp(email, otp_type)
         is_expired = OTPSelector.is_expired(pending_otp)
         if pending_otp and not is_expired:
-            raise OTPExistsError()
+            return
 
         # 3. Generate new OTP
         otp_code = cls._generate_otp_code()

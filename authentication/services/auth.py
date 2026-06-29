@@ -45,11 +45,11 @@ class AuthService:
         }
 
     @classmethod
-    def send_login_otp(cls, email: str):
+    def send_login_otp(cls, email: str, otp_type: OTPType = OTPType.LOGIN):
 
         email = email.strip().lower()
 
-        otp = OTPService.send_otp(email, OTPType.LOGIN)
+        otp = OTPService.send_otp(email, otp_type)
 
         return {
             "email": email,
