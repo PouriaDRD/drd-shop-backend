@@ -31,6 +31,7 @@ INSTALLED_APPS = [
     # Custom apps
     "accounts",
     "authentication",
+    "notifications",
     # "finance",
 ]
 
