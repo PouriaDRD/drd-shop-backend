@@ -1,10 +1,10 @@
 import logging
 
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
+from rest_framework.generics import ListAPIView
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.throttling import ScopedRateThrottle
-from rest_framework.views import APIView
 
 from config.utils import APIResponse
 from notifications.selectors import NotificationSelector
@@ -13,7 +13,7 @@ from notifications.api.serializers import NotificationListSerializer
 logger = logging.getLogger("notifications.notification-list")
 
 
-class NotificationListAPIView(APIView):
+class NotificationListAPIView(ListAPIView):
     """
     Retrieve notifications for authenticated user.
     """
@@ -25,9 +25,14 @@ class NotificationListAPIView(APIView):
     throttle_scope = "user"
     throttle_classes = [ScopedRateThrottle]
 
-    def get(self, request: Request, *args, **kwargs):
+    serializer_class = NotificationListSerializer
+
+    def get_queryset(self):  # type: ignore
+        return NotificationSelector.get_user_notifications(self.request.user)
+
+    def list(self, request: Request, *args, **kwargs):
         try:
-            notifications = NotificationSelector.get_user_notifications(request.user)
+            notifications = self.get_queryset()
 
             unread_count = NotificationSelector.get_unread_count(request.user)
 

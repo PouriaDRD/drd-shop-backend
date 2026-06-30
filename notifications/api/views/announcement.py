@@ -1,7 +1,7 @@
 import logging
 from rest_framework import status
-from rest_framework.views import APIView
 from rest_framework.request import Request
+from rest_framework.generics import ListAPIView
 from rest_framework.permissions import AllowAny
 from rest_framework.throttling import ScopedRateThrottle
 
@@ -13,7 +13,7 @@ from notifications.api.serializers import AnnouncementSerializer
 logger = logging.getLogger("notifications.announcement-list")
 
 
-class AnnouncementListAPIView(APIView):
+class AnnouncementListAPIView(ListAPIView):
     """
     Retrieve active announcements.
     """
@@ -25,15 +25,15 @@ class AnnouncementListAPIView(APIView):
     throttle_scope = "anon"
     throttle_classes = [ScopedRateThrottle]
 
-    def get(self, request: Request, *args, **kwargs):
+    serializer_class = AnnouncementSerializer
+
+    def get_queryset(self):  # type: ignore
+        return AnnouncementSelector.get_visible_announcements()
+
+    def list(self, request: Request, *args, **kwargs):
         try:
-
-            announcements = AnnouncementSelector.get_visible_announcements()
-
-            serializer = AnnouncementSerializer(
-                announcements,
-                many=True,
-            )
+            queryset = self.get_queryset()
+            serializer = self.get_serializer(queryset, many=True)
 
             logger.info("Announcements retrieved")
 

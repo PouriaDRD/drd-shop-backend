@@ -13,11 +13,7 @@ class WalletSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = WalletModel
-        fields = (
-            "id",
-            "balance",
-            "created_at",
-        )
+        fields = ("balance",)
 
         read_only_fields = (
             "id",

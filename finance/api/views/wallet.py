@@ -8,7 +8,7 @@ from config.utils import APIResponse
 from finance.models import WalletModel
 from finance.api.serializers import WalletSerializer
 
-logger = logging.getLogger("finance")
+logger = logging.getLogger("finance.wallet")
 
 
 class WalletRetrieveAPIView(RetrieveAPIView):

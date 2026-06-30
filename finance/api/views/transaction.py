@@ -1,4 +1,5 @@
 import logging
+from rest_framework import status
 from rest_framework.request import Request
 from rest_framework.generics import ListAPIView
 from rest_framework.permissions import IsAuthenticated
@@ -9,7 +10,7 @@ from finance.models import TransactionModel
 from finance.repositories import TransactionRepository
 from finance.api.serializers import TransactionSerializer
 
-logger = logging.getLogger("finance")
+logger = logging.getLogger("finance.transaction-list")
 
 
 class TransactionListAPIView(ListAPIView):
@@ -43,19 +44,24 @@ class TransactionListAPIView(ListAPIView):
         Return transactions in standardized API response.
         """
 
-        user = request.user
-        user_id = str(user.id)
+        try:
+            user = request.user
 
-        queryset = self.get_queryset()
+            queryset = self.get_queryset()
 
-        serializer = self.get_serializer(queryset, many=True)
+            serializer = self.get_serializer(queryset, many=True)
 
-        logger.info(
-            "Transactions retrieved for user %s",
-            f"{user_id[:4]}*****{user_id[-2:]}",
-        )
+            logger.info(f"Transactions retrieved for user: {user}")
 
-        return APIResponse.success(
-            data=serializer.data,
-            message="تراکنش های کیف پول با موفقیت دریافت شد.",
-        )
+            return APIResponse.success(
+                data=serializer.data,
+                message="تراکنش های کیف پول با موفقیت دریافت شد.",
+                status_code=status.HTTP_200_OK,
+            )
+        except Exception as e:
+            logger.error(f"Error while retrieving transactions: {e}")
+            return APIResponse.error(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                message="خطا در دریافت تراکنش های کیف پول.",
+                errors="خطا در دریافت تراکنش های کیف پول.",
+            )

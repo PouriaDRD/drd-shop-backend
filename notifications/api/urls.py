@@ -6,6 +6,6 @@ from notifications.api.views import (
 )
 
 urlpatterns = [
+    path("", NotificationListAPIView.as_view(), name="notifications"),
     path("announcements/", AnnouncementListAPIView.as_view(), name="announcements"),
-    path("notifications/", NotificationListAPIView.as_view(), name="notifications"),
 ]
