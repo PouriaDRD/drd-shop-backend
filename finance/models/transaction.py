@@ -71,4 +71,5 @@ class TransactionModel(models.Model):
         ]
 
     def __str__(self):
-        return f"{self.id}"
+        txid = f"{str(self.id)[:4]}*****{str(self.id)[-4:]}"
+        return f"{txid} | {self.amount}"

@@ -18,7 +18,7 @@ urlpatterns = [
     # API v1 routes
     path(base_url + "accounts/", include("accounts.api.urls")),
     path(base_url + "authentication/", include("authentication.api.urls")),
-    # path(base_url + "finance/", include("finance.api.urls")),
+    path(base_url + "finance/", include("finance.api.urls")),
     path(base_url + "notifications/", include("notifications.api.urls")),
 ]
 

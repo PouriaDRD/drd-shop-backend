@@ -3,6 +3,7 @@ from django.utils import timezone
 from rest_framework.exceptions import ValidationError
 
 from accounts.models import UserModel
+from finance.services import WalletService
 from accounts.repositories import UserRepository
 
 
@@ -19,11 +20,15 @@ class UserService:
                 "حساب کاربری قبلا ایجاد شده است.", code="user_already_exists"
             )
 
-        return UserRepository.create(
+        new_user = UserRepository.create(
             email=email,
             password=password,
             **extra_fields,
         )
+
+        wallet = WalletService.create_wallet(new_user)
+
+        return new_user
 
     @classmethod
     @transaction.atomic
