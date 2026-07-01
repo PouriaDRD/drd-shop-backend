@@ -68,7 +68,7 @@ class TransactionAdmin(admin.ModelAdmin):
             updated = 0
 
             for tx in queryset:
-                if tx.status == TransactionStatus.APPROVED:
+                if tx.status != TransactionStatus.PENDING:
                     continue
 
                 TransactionService.approve(tx.id)
@@ -89,7 +89,7 @@ class TransactionAdmin(admin.ModelAdmin):
             updated = 0
 
             for tx in queryset:
-                if tx.status == TransactionStatus.REJECTED:
+                if tx.status != TransactionStatus.PENDING:
                     continue
 
                 TransactionService.reject(tx.id)
