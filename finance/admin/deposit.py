@@ -45,6 +45,12 @@ class DepositRequestAdmin(admin.ModelAdmin):
 
     list_per_page = 25
 
+    def has_add_permission(self, request):
+        return DEV
+
+    def has_change_permission(self, request, obj=None):
+        return DEV
+
     def has_delete_permission(self, request, obj=None):
         return DEV
 

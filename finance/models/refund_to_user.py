@@ -8,7 +8,7 @@ from django.core.validators import (
 from .wallet import WalletModel
 from .transaction import TransactionModel
 from finance.enums import (
-    TransactionStatus,
+    RefundToUserStatus,
     DepositPaymentMethod,
 )
 
@@ -119,8 +119,8 @@ class RefundToUserRequestModel(models.Model):
 
     status = models.CharField(
         max_length=20,
-        choices=TransactionStatus.choices,
-        default=TransactionStatus.PENDING,
+        choices=RefundToUserStatus.choices,
+        default=RefundToUserStatus.PENDING,
     )
 
     is_processed = models.BooleanField(

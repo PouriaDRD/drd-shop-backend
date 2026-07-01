@@ -3,8 +3,7 @@ from .ledger import LedgerRepository
 from .deposit import DepositRepository
 from .purchase import PurchaseRepository
 from .transaction import TransactionRepository
-
-# from .refund_to_wallet import RefundToWalletRepository
+from .refund import RefundRepository
 
 __all__ = [
     "WalletRepository",
@@ -12,5 +11,5 @@ __all__ = [
     "DepositRepository",
     "PurchaseRepository",
     "TransactionRepository",
-    # "RefundToWalletRepository",
+    "RefundRepository",
 ]

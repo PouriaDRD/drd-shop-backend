@@ -1,10 +1,23 @@
 from django.contrib import admin
 
-from finance.models import RefundToUserRequestModel
+from finance.models import (
+    RefundToUserRequestModel,
+)
+
+from finance.services.refund import RefundService
+from finance.enums import (
+    RefundToUserStatus,
+)
+
+DEV = True
 
 
+# ========================================================
+# USER REFUND ADMIN
+# ========================================================
 @admin.register(RefundToUserRequestModel)
-class RefundToUserRequestAdmin(admin.ModelAdmin):
+class UserRefundAdmin(admin.ModelAdmin):
+
     list_display = (
         "receiver_name",
         "receiver_card_number",
@@ -41,3 +54,44 @@ class RefundToUserRequestAdmin(admin.ModelAdmin):
     ordering = ("-created_at",)
 
     list_per_page = 25
+
+    def has_delete_permission(self, request, obj=None):
+        return DEV
+
+    actions = ["approve", "reject"]
+
+    @admin.action(description="Approve user refunds")
+    def approve(self, request, queryset):
+        try:
+            updated = 0
+
+            for obj in queryset:
+                if obj.status != RefundToUserStatus.PENDING:
+                    continue
+
+                RefundService.approve_user_refund(obj.id)
+
+                updated += 1
+
+            self.message_user(request, f"{updated} user refunds approved.")
+
+        except Exception as e:
+            self.message_user(request, f"Error approving refunds: {str(e)}")
+
+    @admin.action(description="Reject user refunds")
+    def reject(self, request, queryset):
+        try:
+            updated = 0
+
+            for obj in queryset:
+                if obj.status != RefundToUserStatus.PENDING:
+                    continue
+
+                RefundService.reject_user_refund(obj.id)
+
+                updated += 1
+
+            self.message_user(request, f"{updated} user refunds rejected.")
+
+        except Exception as e:
+            self.message_user(request, f"Error rejecting refunds: {str(e)}")

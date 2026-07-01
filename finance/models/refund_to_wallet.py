@@ -3,7 +3,7 @@ from django.db import models
 
 from .wallet import WalletModel
 from .transaction import TransactionModel
-from finance.enums import TransactionStatus
+from finance.enums import RefundToWalletStatus
 
 
 class RefundToWalletRequestModel(models.Model):
@@ -59,8 +59,8 @@ class RefundToWalletRequestModel(models.Model):
 
     status = models.CharField(
         max_length=20,
-        choices=TransactionStatus.choices,
-        default=TransactionStatus.PENDING,
+        choices=RefundToWalletStatus.choices,
+        default=RefundToWalletStatus.PENDING,
     )
 
     is_processed = models.BooleanField(
