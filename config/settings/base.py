@@ -136,6 +136,16 @@ EMAIL_HOST_PASSWORD = config.email.host_password
 DEFAULT_FROM_EMAIL = config.email.default_from_email
 
 # ---------------------------------------------------------------
+# Celery Configuration
+# ---------------------------------------------------------------
+CELERY_BROKER_URL = config.celery.broker_url
+CELERY_RESULT_BACKEND = config.celery.result_backend
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_TIMEZONE = config.i18n.time_zone
+
+# ---------------------------------------------------------------
 # Simple JWT Configuration
 # ---------------------------------------------------------------
 SIMPLE_JWT = {

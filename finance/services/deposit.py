@@ -1,72 +1,164 @@
-from finance.selectors import WalletSelector
-from finance.models import WalletModel, TransactionModel
-from finance.repositories import LedgerRepository, TransactionRepository
+import logging
+
+from django.db import transaction
+from django.utils import timezone
+from rest_framework.exceptions import ValidationError
+
 from finance.enums import (
-    PaymentMethod,
+    DepositStatus,
     TransactionStatus,
     TransactionType,
 )
+from finance.models import DepositRequestModel
+from finance.repositories import (
+    DepositRepository,
+    LedgerRepository,
+    TransactionRepository,
+    WalletRepository,
+)
+
+logger = logging.getLogger("finance.deposit_service")
 
 
 class DepositService:
     """
-    Handle wallet deposit requests.
+    Business logic for deposit requests.
     """
 
     @staticmethod
-    def request_deposit(
-        amount: int,
-        wallet: WalletModel,
-        method: PaymentMethod = PaymentMethod.CARD_TO_CARD,
-        **kwargs,
-    ) -> TransactionModel:
+    def create(**validated_data) -> DepositRequestModel:
         """
-        Create deposit request (PENDING).
+        Create a new deposit request.
+
+        The request is created with PENDING status.
+        No wallet balance is changed here.
         """
-        can_deposit = WalletSelector.can_deposit(str(wallet.id))
 
-        if not can_deposit:
-            raise ValueError("Deposit request already exists")
+        deposit = DepositRepository.create(**validated_data)
 
-        transaction = TransactionRepository.create(
-            amount=amount,
+        logger.info(
+            f"Deposit request created | id={deposit.id} amount={deposit.amount}",
+        )
+
+        return deposit
+
+    @staticmethod
+    @transaction.atomic
+    def approve(
+        deposit_id,
+    ) -> DepositRequestModel:
+        """
+        Approve a deposit request.
+
+        Flow:
+
+            Lock Deposit
+                    ↓
+            Validate State
+                    ↓
+            Lock Wallet
+                    ↓
+            Create Transaction
+                    ↓
+            Update Wallet Balance
+                    ↓
+            Create Ledger Entry
+                    ↓
+            Approve Transaction
+                    ↓
+            Approve Deposit
+        """
+
+        deposit = DepositRepository.lock(deposit_id)
+
+        if deposit.is_processed:
+            raise ValidationError("Deposit request has already been processed.")
+
+        wallet = WalletRepository.lock(
+            deposit.wallet.id,
+        )
+
+        balance_before = wallet.balance
+        balance_after = balance_before + deposit.amount
+
+        transaction_obj = TransactionRepository.create(
             wallet=wallet,
-            method=method,
-            type=TransactionType.DEPOSIT,
-            status=TransactionStatus.PENDING,
-            **kwargs,
+            amount=deposit.amount,
+            transaction_type=TransactionType.DEPOSIT,
+            status=TransactionStatus.APPROVED,
+            description="Deposit approved.",
         )
 
-        return transaction
+        wallet.balance = balance_after
+        wallet.save(update_fields=["balance", "updated_at"])
 
-    @staticmethod
-    def approve_deposit(transaction: TransactionModel):
-        """
-        Approve deposit and increase wallet balance via ledger.
-        """
-
-        if transaction.status != TransactionStatus.PENDING:
-            raise ValueError("Transaction already processed")
-
-        if transaction.transaction_type != TransactionType.DEPOSIT:
-            raise ValueError("Invalid transaction type")
-
-        # create ledger entry (REAL MONEY CHANGE)
         LedgerRepository.create(
-            amount=transaction.amount,
-            wallet=transaction.wallet,
-            transaction=transaction,
+            wallet=wallet,
+            transaction=transaction_obj,
+            transaction_type=TransactionType.DEPOSIT,
+            amount=deposit.amount,
+            balance_before=balance_before,
+            balance_after=balance_after,
         )
 
-        TransactionRepository.update_status(transaction, TransactionStatus.COMPLETED)
+        deposit.transaction = transaction_obj
+        deposit.status = DepositStatus.APPROVED
+        deposit.is_processed = True
+        deposit.reviewed_at = timezone.now()
+
+        deposit.save(
+            update_fields=[
+                "transaction",
+                "status",
+                "is_processed",
+                "reviewed_at",
+                "updated_at",
+            ]
+        )
+
+        logger.info(
+            f"Deposit approved | deposit={deposit.id} transaction={transaction_obj.id}",
+        )
+
+        return deposit
 
     @staticmethod
-    def reject_deposit(transaction: TransactionModel):
+    @transaction.atomic
+    def reject(
+        deposit_id,
+        *,
+        admin_note: str = "",
+    ) -> DepositRequestModel:
         """
         Reject deposit request.
+
+        No wallet balance changes.
         """
 
-        if transaction.status != TransactionStatus.PENDING:
-            raise ValueError("Already processed")
+        deposit = DepositRepository.lock(
+            deposit_id,
+        )
 
-        TransactionRepository.update_status(transaction, TransactionStatus.REJECTED)
+        if deposit.is_processed:
+            raise ValidationError("Deposit request has already been processed.")
+
+        deposit.admin_note = admin_note
+        deposit.status = DepositStatus.REJECTED
+        deposit.is_processed = True
+        deposit.reviewed_at = timezone.now()
+
+        deposit.save(
+            update_fields=[
+                "admin_note",
+                "status",
+                "is_processed",
+                "reviewed_at",
+                "updated_at",
+            ]
+        )
+
+        logger.info(
+            f"Deposit rejected | deposit={deposit.id}",
+        )
+
+        return deposit

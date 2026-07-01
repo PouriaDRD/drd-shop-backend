@@ -1,48 +1,171 @@
 from django.db import transaction
+from django.db.models import QuerySet
+
+from finance.enums import TransactionStatus, TransactionType
 from finance.models import TransactionModel, WalletModel
-from finance.enums import TransactionType, TransactionStatus, PaymentMethod
 
 
 class TransactionRepository:
-    """Repository for TransactionModel."""
+    """
+    Repository layer for transaction persistence.
+
+    Responsible only for database operations.
+    """
 
     @staticmethod
     @transaction.atomic
     def create(
-        amount: int,
+        *,
         wallet: WalletModel,
-        type: TransactionType = TransactionType.DEPOSIT,
-        method: PaymentMethod = PaymentMethod.CARD_TO_CARD,
+        amount: int,
+        transaction_type: TransactionType,
+        description: str = "",
         status: TransactionStatus = TransactionStatus.PENDING,
-        **kwargs
-    ):
-        new_transaction = TransactionModel.objects.create(
-            amount=amount,
+    ) -> TransactionModel:
+        """
+        Create a transaction.
+
+        Args:
+            wallet: Target wallet.
+            amount: Signed amount.
+            transaction_type: Transaction type.
+            description: Optional description.
+            status: Initial transaction status.
+
+        Returns:
+            Newly created transaction.
+        """
+
+        return TransactionModel.objects.create(
             wallet=wallet,
+            amount=amount,
+            type=transaction_type,
+            description=description,
             status=status,
-            transaction_type=type,
-            payment_method=method,
-            **kwargs,
         )
-        return new_transaction
 
     @staticmethod
-    def update_status(transaction: TransactionModel, status: TransactionStatus):
-        transaction.status = status
-        transaction.save(update_fields=["status"])
-
-    @staticmethod
-    def get_transaction_by_id(id):
-        transaction = TransactionModel.objects.get(id=id)
-        return transaction
-
-    @staticmethod
-    def get_wallet_transactions(wallet_id: int):
+    def get_by_id(transaction_id) -> TransactionModel | None:
         """
-        Get wallet transactions ordered by newest first.
+        Retrieve transaction by id.
         """
 
-        qs = TransactionModel.objects.filter(wallet_id=wallet_id).order_by(
-            "-created_at"
+        return (
+            TransactionModel.objects.select_related("wallet")
+            .filter(id=transaction_id)
+            .first()
         )
-        return qs
+
+    @staticmethod
+    def get_wallet_transactions(
+        wallet: WalletModel,
+    ) -> QuerySet[TransactionModel]:
+        """
+        Return wallet transaction history.
+        """
+
+        return (
+            TransactionModel.objects.filter(wallet=wallet)
+            .select_related("wallet")
+            .order_by("-created_at")
+        )
+
+    @staticmethod
+    @transaction.atomic
+    def update_status(
+        transaction_obj: TransactionModel,
+        status: TransactionStatus,
+    ) -> TransactionModel:
+        """
+        Update transaction status.
+        """
+
+        transaction_obj.status = status
+        transaction_obj.save(
+            update_fields=[
+                "status",
+                "updated_at",
+            ]
+        )
+
+        return transaction_obj
+
+    @staticmethod
+    @transaction.atomic
+    def mark_processed(
+        transaction_obj: TransactionModel,
+    ) -> TransactionModel:
+        """
+        Mark transaction as processed.
+
+        This method must only be called once.
+        """
+
+        transaction_obj.is_processed = True
+
+        transaction_obj.save(
+            update_fields=[
+                "is_processed",
+                "updated_at",
+            ]
+        )
+
+        return transaction_obj
+
+    @staticmethod
+    @transaction.atomic
+    def approve(
+        transaction_obj: TransactionModel,
+    ) -> TransactionModel:
+        """
+        Approve transaction.
+        """
+
+        transaction_obj.status = TransactionStatus.APPROVED
+        transaction_obj.is_processed = True
+
+        transaction_obj.save(
+            update_fields=[
+                "status",
+                "is_processed",
+                "reviewed_at",
+                "updated_at",
+            ]
+        )
+
+        return transaction_obj
+
+    @staticmethod
+    @transaction.atomic
+    def reject(
+        transaction_obj: TransactionModel,
+    ) -> TransactionModel:
+        """
+        Reject transaction.
+        """
+
+        transaction_obj.status = TransactionStatus.REJECTED
+        transaction_obj.is_processed = True
+
+        transaction_obj.save(
+            update_fields=[
+                "status",
+                "is_processed",
+                "reviewed_at",
+                "updated_at",
+            ]
+        )
+
+        return transaction_obj
+
+    @staticmethod
+    def lock(transaction_id) -> TransactionModel:
+        """
+        Lock transaction row for update.
+
+        Must be called inside an atomic transaction.
+        """
+
+        return TransactionModel.objects.select_for_update().get(
+            id=transaction_id,
+        )

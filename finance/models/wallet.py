@@ -1,12 +1,17 @@
 import uuid
-
 from django.db import models
+
 from accounts.models import UserModel
 
 
 class WalletModel(models.Model):
     """
-    User wallet.
+    Wallet attached to a single user.
+
+    Notes:
+        - balance is a cached value for fast reads.
+        - LedgerEntryModel is the source of truth.
+        - Never update balance directly outside finance services.
     """
 
     id = models.UUIDField(
@@ -21,22 +26,20 @@ class WalletModel(models.Model):
         related_name="wallet",
     )
 
-    updated_at = models.DateTimeField(
-        auto_now=True,
-    )
+    balance = models.BigIntegerField(default=0)
 
-    created_at = models.DateTimeField(
-        auto_now_add=True,
-    )
+    updated_at = models.DateTimeField(auto_now=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         db_table = "wallets"
+
+        ordering = ("-created_at",)
 
         verbose_name = "Wallet"
 
         verbose_name_plural = "Wallets"
 
-        ordering = ("-created_at",)
-
     def __str__(self):
-        return str(self.user)
+        return f"{self.user}'s wallet"

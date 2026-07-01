@@ -1,18 +1,21 @@
 import uuid
-
 from django.db import models
 
-from .wallet import WalletModel
 from finance.enums import (
-    PaymentMethod,
     TransactionStatus,
     TransactionType,
 )
+from .wallet import WalletModel
 
 
 class TransactionModel(models.Model):
     """
     Financial transaction.
+
+    Created only after a request has been processed.
+
+    Every approved transaction must generate exactly one
+    LedgerEntryModel.
     """
 
     id = models.UUIDField(
@@ -27,12 +30,11 @@ class TransactionModel(models.Model):
         related_name="transactions",
     )
 
-    amount = models.BigIntegerField()
+    amount = models.PositiveBigIntegerField()
 
-    transaction_type = models.CharField(
-        max_length=20,
+    type = models.CharField(
+        max_length=30,
         choices=TransactionType.choices,
-        default=TransactionType.DEPOSIT,
     )
 
     status = models.CharField(
@@ -41,35 +43,29 @@ class TransactionModel(models.Model):
         default=TransactionStatus.PENDING,
     )
 
-    payment_method = models.CharField(
-        max_length=30,
-        choices=PaymentMethod.choices,
-        default=PaymentMethod.CARD_TO_CARD,
+    description = models.TextField(blank=True)
+
+    is_processed = models.BooleanField(
+        default=False,
     )
 
-    description = models.TextField(
+    reviewed_at = models.DateTimeField(
+        null=True,
         blank=True,
     )
 
-    updated_at = models.DateTimeField(
-        auto_now=True,
-    )
+    updated_at = models.DateTimeField(auto_now=True)
 
-    created_at = models.DateTimeField(
-        auto_now_add=True,
-    )
+    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         db_table = "transactions"
+
+        ordering = ["-created_at"]
 
         verbose_name = "Transaction"
 
         verbose_name_plural = "Transactions"
 
-        ordering = [
-            "-created_at",
-        ]
-
     def __str__(self):
-        txid = f"{str(self.id)[:4]}*****{str(self.id)[-4:]}"
-        return f"{txid} | {self.amount}"
+        return f"{self.type} | {self.amount:,}"

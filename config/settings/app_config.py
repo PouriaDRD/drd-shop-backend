@@ -56,6 +56,16 @@ class EmailConfig:
 
 
 @dataclass(frozen=True)
+class CeleryConfig:
+    """
+    Celery configuration.
+    """
+
+    broker_url: str
+    result_backend: str
+
+
+@dataclass(frozen=True)
 class AuthConfig:
     """
     Authentication configuration.
@@ -102,6 +112,11 @@ class Config:
             host_password=self._get_required("EMAIL_HOST_PASSWORD"),
             default_from_email=self._get_required("DEFAULT_FROM_EMAIL"),
             max_retry_attempts=self._get_int("MAX_RETRY_ATTEMPTS"),
+        )
+
+        self.celery = CeleryConfig(
+            broker_url=self._get_required("CELERY_BROKER_URL"),
+            result_backend=self._get_required("CELERY_RESULT_BACKEND"),
         )
 
         self.auth = AuthConfig(
