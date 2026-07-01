@@ -83,9 +83,6 @@ class PurchaseService:
             description="Purchase approved.",
         )
 
-        wallet.balance = balance_after
-        wallet.save(update_fields=["balance", "updated_at"])
-
         LedgerRepository.create(
             wallet=wallet,
             transaction=transaction_obj,

@@ -1,6 +1,4 @@
 import logging
-
-from django.db import transaction
 from rest_framework.exceptions import ValidationError
 
 from accounts.models import UserModel
@@ -39,104 +37,6 @@ class WalletService:
 
         logger.info(
             f"Wallet created | wallet={wallet.id} user={user.id}",
-        )
-
-        return wallet
-
-    @staticmethod
-    @transaction.atomic
-    def deposit(
-        wallet_id,
-        amount: int,
-    ) -> WalletModel:
-        """
-        Increase wallet balance.
-
-        Args:
-            wallet_id:
-                Wallet identifier.
-
-            amount:
-                Positive amount.
-
-        Returns:
-            Updated wallet.
-        """
-
-        if amount <= 0:
-            raise ValidationError("Amount must be greater than zero.")
-
-        wallet = WalletRepository.lock(wallet_id)
-
-        wallet.balance += amount
-
-        WalletRepository.update_balance(
-            wallet,
-            wallet.balance,
-        )
-
-        logger.info(
-            f"Wallet credited | wallet={wallet.id} amount={amount} balance={wallet.balance}",
-        )
-
-        return wallet
-
-    @staticmethod
-    @transaction.atomic
-    def withdraw(
-        wallet_id,
-        amount: int,
-    ) -> WalletModel:
-        """
-        Decrease wallet balance.
-
-        Raises:
-            ValidationError:
-                If balance is insufficient.
-        """
-
-        if amount <= 0:
-            raise ValidationError("Amount must be greater than zero.")
-
-        wallet = WalletRepository.lock(wallet_id)
-
-        if wallet.balance < amount:
-            raise ValidationError("Insufficient wallet balance.")
-
-        wallet.balance -= amount
-
-        WalletRepository.update_balance(
-            wallet,
-            wallet.balance,
-        )
-
-        logger.info(
-            f"Wallet debited | wallet={wallet.id} amount={amount} balance={wallet.balance}"
-        )
-
-        return wallet
-
-    @staticmethod
-    @transaction.atomic
-    def set_balance(
-        wallet_id,
-        balance: int,
-    ) -> WalletModel:
-        """
-        Force wallet balance.
-
-        Intended for internal use only.
-        """
-
-        wallet = WalletRepository.lock(wallet_id)
-
-        WalletRepository.update_balance(
-            wallet,
-            balance,
-        )
-
-        logger.warning(
-            f"Wallet balance manually changed | wallet={wallet.id} balance={balance}"
         )
 
         return wallet

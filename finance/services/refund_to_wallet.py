@@ -51,9 +51,6 @@ class RefundService:
             description=description or "Refund to wallet",
         )
 
-        wallet.balance = balance_after
-        wallet.save(update_fields=["balance", "updated_at"])
-
         LedgerRepository.create(
             wallet=wallet,
             transaction=transaction_obj,
@@ -97,9 +94,6 @@ class RefundService:
             status=TransactionStatus.APPROVED,
             description=description or "Refund to user",
         )
-
-        wallet.balance = balance_after
-        wallet.save(update_fields=["balance", "updated_at"])
 
         LedgerRepository.create(
             wallet=wallet,

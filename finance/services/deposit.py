@@ -89,9 +89,6 @@ class DepositService:
             description="Deposit approved.",
         )
 
-        wallet.balance = balance_after
-        wallet.save(update_fields=["balance", "updated_at"])
-
         LedgerRepository.create(
             wallet=wallet,
             transaction=transaction_obj,

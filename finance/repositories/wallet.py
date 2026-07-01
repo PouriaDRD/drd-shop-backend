@@ -61,27 +61,6 @@ class WalletRepository:
 
     @staticmethod
     @transaction.atomic
-    def update_balance(
-        wallet: WalletModel,
-        new_balance: int,
-    ) -> WalletModel:
-        """
-        Persist wallet balance.
-        """
-
-        wallet.balance = new_balance
-
-        wallet.save(
-            update_fields=[
-                "balance",
-                "updated_at",
-            ]
-        )
-
-        return wallet
-
-    @staticmethod
-    @transaction.atomic
     def lock(wallet_id) -> WalletModel:
         """
         Lock wallet row.

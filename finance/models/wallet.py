@@ -1,6 +1,6 @@
 import uuid
 from django.db import models
-
+from django.db.models import Sum
 from accounts.models import UserModel
 
 
@@ -26,11 +26,14 @@ class WalletModel(models.Model):
         related_name="wallet",
     )
 
-    balance = models.BigIntegerField(default=0)
-
     updated_at = models.DateTimeField(auto_now=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
+
+    @property
+    def balance(self):
+        result = self.ledger_entries.aggregate(balance=Sum("amount"))  # type: ignore
+        return int(result["balance"]) if result and not result["balance"] is None else 0
 
     class Meta:
         db_table = "wallets"
