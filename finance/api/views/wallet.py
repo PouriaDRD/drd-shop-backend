@@ -1,4 +1,5 @@
 import logging
+from rest_framework import status
 from rest_framework.request import Request
 from rest_framework.generics import RetrieveAPIView
 from rest_framework.permissions import IsAuthenticated
@@ -38,18 +39,22 @@ class WalletRetrieveAPIView(RetrieveAPIView):
         """
         Return wallet data in standardized API response.
         """
-        user = request.user
-        user_id = str(user.id)
+        try:
+            user = request.user
 
-        wallet = self.get_object()
-        serializer = self.get_serializer(wallet)
+            wallet = self.get_object()
+            serializer = self.get_serializer(wallet)
 
-        logger.info(
-            "Wallet retrieved for user %s",
-            f"{user_id[:4]}*****{user_id[-2:]}",
-        )
+            logger.info(f"Wallet retrieved for user {user}")
 
-        return APIResponse.success(
-            data=serializer.data,
-            message="کیف پول با موفقیت دریافت شد.",
-        )
+            return APIResponse.success(
+                data=serializer.data,
+                message="کیف پول با موفقیت دریافت شد.",
+            )
+
+        except Exception as e:
+            logger.error(e)
+            return APIResponse.error(
+                message="خطا در دریافت کیف پول وجود ندارد.",
+                status_code=status.HTTP_404_NOT_FOUND,
+            )

@@ -43,15 +43,13 @@ class LoginAPIView(GenericAPIView):
         except ValidationError as e:
             logger.warning(f"Error registering user: {e.get_codes()}")
             return APIResponse.error(
-                message=f"خطا در ورود حساب کاربری",
+                message=f"نام کاربری یا رمز عبور اشتباه است.",
                 status_code=status.HTTP_400_BAD_REQUEST,
-                errors=f"خطا در ورود حساب کاربری",
             )
 
         except Exception as e:
             logger.error(f"Error logging in user: {e}")
             return APIResponse.error(
-                message=f"خطا در ورود به سیستم",
+                message=f"نام کاربری یا رمز عبور اشتباه است.",
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                errors=f"خطا در ورود حساب کاربری",
             )

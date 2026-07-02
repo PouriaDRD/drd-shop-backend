@@ -46,7 +46,6 @@ class SendLoginOTPAPIView(GenericAPIView):
             return APIResponse.error(
                 message=f"خطا در ارسال کد ایمیل",
                 status_code=status.HTTP_400_BAD_REQUEST,
-                errors=f"خطا در ارسال کد ایمیل",
             )
 
         except Exception as e:
@@ -54,7 +53,6 @@ class SendLoginOTPAPIView(GenericAPIView):
             return APIResponse.error(
                 message=f"خطا در ارسال کد ایمیل",
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                errors=f"خطا در ارسال کد ایمیل",
             )
 
 
@@ -89,7 +87,6 @@ class VerifyLoginOTPAPIView(GenericAPIView):
             return APIResponse.error(
                 message=f"کد وارد شده اشتباه یا منقضی شده است",
                 status_code=status.HTTP_400_BAD_REQUEST,
-                errors=f"کد وارد شده اشتباه یا منقضی شده است",
             )
 
         except Exception as e:
@@ -97,5 +94,4 @@ class VerifyLoginOTPAPIView(GenericAPIView):
             return APIResponse.error(
                 message=f"خطا در تایید کد ایمیل",
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                errors=f"خطا در تایید کد ایمیل",
             )

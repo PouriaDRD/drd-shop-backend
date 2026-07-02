@@ -8,7 +8,8 @@ class TransactionSerializer(serializers.ModelSerializer):
         model = TransactionModel
         fields = [
             "id",
-            "transaction_type",
+            "amount",
+            "type",
             "status",
             "payment_method",
             "description",

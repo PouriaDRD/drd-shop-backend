@@ -45,24 +45,17 @@ class NotificationListAPIView(ListAPIView):
                 },
             )
 
-            logger.info(
-                "Notifications retrieved for user %s",
-                request.user.id,
-            )
+            logger.info(f"Notifications retrieved for user {request.user}")
 
             return APIResponse.success(
                 data=serializer.data,
                 message="اعلان‌ها با موفقیت دریافت شدند.",
             )
 
-        except Exception:
-            logger.exception(
-                "Error retrieving notifications for user %s",
-                request.user.id,
-            )
+        except Exception as e:
+            logger.exception(f"Error retrieving notifications for user {e}")
 
             return APIResponse.error(
                 message="خطا در دریافت اعلان‌ها.",
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                errors="خطا در دریافت اعلان‌ها.",
             )

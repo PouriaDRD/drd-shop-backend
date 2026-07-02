@@ -1,7 +1,7 @@
 from accounts.models import UserModel
 from rest_framework import serializers
 
-# from finance.api.serializers import WalletSerializer
+from finance.api.serializers import WalletSerializer
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -9,7 +9,7 @@ class UserSerializer(serializers.ModelSerializer):
     Serializer for UserModel.
     """
 
-    # wallet = WalletSerializer(read_only=True)
+    wallet = WalletSerializer(read_only=True)
 
     class Meta:
         model = UserModel
@@ -21,6 +21,6 @@ class UserSerializer(serializers.ModelSerializer):
             "status",
             "last_login",
             "created_at",
-            # "wallet",
+            "wallet",
         )
         read_only_fields = ["__all__"]

@@ -27,9 +27,11 @@ class UserAPIView(RetrieveAPIView):
 
     def get(self, request: Request, *args, **kwargs):
         try:
-            serializer = self.serializer_class(request.user)
+            user = request.user
 
-            logger.info("User data retrieved")
+            serializer = self.serializer_class(user)
+
+            logger.info(f"User data retrieved for user: {user}")
 
             return APIResponse.success(
                 data=serializer.data,
@@ -37,7 +39,7 @@ class UserAPIView(RetrieveAPIView):
             )
 
         except Exception as e:
-            logger.error(f"Error retrieving user: {e}")
+            logger.error(f"Error retrieving user data: {e}")
             return APIResponse.error(
                 message=f"خطا در دریافت اطلاعات کاربر",
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

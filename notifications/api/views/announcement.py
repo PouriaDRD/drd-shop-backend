@@ -32,6 +32,7 @@ class AnnouncementListAPIView(ListAPIView):
 
     def list(self, request: Request, *args, **kwargs):
         try:
+
             queryset = self.get_queryset()
             serializer = self.get_serializer(queryset, many=True)
 
@@ -42,10 +43,8 @@ class AnnouncementListAPIView(ListAPIView):
                 message="اعلامیه‌ها با موفقیت دریافت شدند.",
             )
 
-        except Exception:
-            logger.exception(
-                "Error retrieving announcements",
-            )
+        except Exception as e:
+            logger.exception(f"Error retrieving announcements: {e}")
 
             return APIResponse.error(
                 message="خطا در دریافت اعلامیه‌ها.",

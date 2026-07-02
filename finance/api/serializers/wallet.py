@@ -9,21 +9,7 @@ class WalletSerializer(serializers.ModelSerializer):
     Wallet read serializer.
     """
 
-    balance = serializers.SerializerMethodField()
-
     class Meta:
         model = WalletModel
         fields = ("balance",)
-
-        read_only_fields = (
-            "id",
-            "balance",
-            "created_at",
-        )
-
-    def get_balance(self, obj: WalletModel) -> int:
-        """
-        Return current wallet balance.
-        """
-
-        return WalletRepository.get_balance(obj)
+        read_only_fields = ("__all__",)

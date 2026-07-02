@@ -58,5 +58,4 @@ class TokenRefreshAPIView(GenericAPIView):
             return APIResponse.error(
                 message=f"خطا در تایید کاربر",
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                errors=e,
             )

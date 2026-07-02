@@ -63,5 +63,4 @@ class TransactionListAPIView(ListAPIView):
             return APIResponse.error(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 message="خطا در دریافت تراکنش های کیف پول.",
-                errors="خطا در دریافت تراکنش های کیف پول.",
             )
