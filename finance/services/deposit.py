@@ -9,7 +9,7 @@ from finance.enums import (
     TransactionStatus,
     TransactionType,
 )
-from finance.models import DepositRequestModel
+from finance.models import DepositRequestModel, WalletModel
 from finance.repositories import (
     DepositRepository,
     LedgerRepository,
@@ -26,7 +26,7 @@ class DepositService:
     """
 
     @staticmethod
-    def create(**validated_data) -> DepositRequestModel:
+    def create(wallet: WalletModel, **validated_data) -> DepositRequestModel:
         """
         Create a new deposit request.
 
@@ -34,7 +34,7 @@ class DepositService:
         No wallet balance is changed here.
         """
 
-        deposit = DepositRepository.create(**validated_data)
+        deposit = DepositRepository.create(wallet, **validated_data)
 
         logger.info(
             f"Deposit request created | id={deposit.id} amount={deposit.amount}",

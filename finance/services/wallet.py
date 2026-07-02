@@ -36,7 +36,7 @@ class WalletService:
         wallet = WalletRepository.create(user)
 
         logger.info(
-            f"Wallet created | wallet={wallet.id} user={user.id}",
+            f"Wallet created | wallet={wallet.id} user={user}",
         )
 
         return wallet

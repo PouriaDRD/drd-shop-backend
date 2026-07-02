@@ -2,7 +2,7 @@ from django.db import transaction
 from django.db.models import QuerySet
 
 from finance.enums import DepositStatus
-from finance.models import DepositRequestModel, TransactionModel
+from finance.models import DepositRequestModel, TransactionModel, WalletModel
 
 
 class DepositRepository:
@@ -15,13 +15,14 @@ class DepositRepository:
     @staticmethod
     @transaction.atomic
     def create(
+        wallet: WalletModel,
         **kwargs,
     ) -> DepositRequestModel:
         """
         Create a new deposit request.
         """
 
-        return DepositRequestModel.objects.create(**kwargs)
+        return DepositRequestModel.objects.create(wallet=wallet, **kwargs)
 
     @staticmethod
     def get_by_id(
@@ -51,6 +52,42 @@ class DepositRepository:
                 transaction__wallet_id=wallet_id,
             )
             .select_related(
+                "transaction",
+            )
+            .order_by("-created_at")
+        )
+
+    @staticmethod
+    def get_wallet_deposits(
+        wallet_id: str,
+    ) -> QuerySet[DepositRequestModel]:
+        """
+        Retrieve all deposit requests belonging to a wallet.
+        """
+
+        return (
+            DepositRequestModel.objects.filter(wallet_id=wallet_id)
+            .select_related(
+                "wallet",
+                "wallet__user",
+                "transaction",
+            )
+            .order_by("-created_at")
+        )
+
+    @staticmethod
+    def get_pending() -> QuerySet[DepositRequestModel]:
+        """
+        Retrieve all pending deposit requests.
+        """
+
+        return (
+            DepositRequestModel.objects.filter(
+                is_processed=False,
+            )
+            .select_related(
+                "wallet",
+                "wallet__user",
                 "transaction",
             )
             .order_by("-created_at")

@@ -4,7 +4,7 @@ from rest_framework.exceptions import ValidationError
 
 from accounts.models import UserModel
 
-# from finance.services import WalletService
+from finance.services import WalletService
 from accounts.repositories import UserRepository
 
 
@@ -27,7 +27,7 @@ class UserService:
             **extra_fields,
         )
 
-        # wallet = WalletService.create_wallet(new_user)
+        wallet = WalletService.create(new_user)
 
         return new_user
 
