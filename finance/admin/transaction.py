@@ -33,7 +33,7 @@ class TransactionAdmin(admin.ModelAdmin):
         "wallet",
         "amount",
         "type",
-        "description",
+        # "description",
         "status",
         "is_processed",
         "reviewed_at",
