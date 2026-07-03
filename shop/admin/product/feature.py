@@ -9,6 +9,7 @@ class FeatureAdmin(admin.ModelAdmin):
         "key",
         "title",
         "value_type",
+        "updated_at",
         "created_at",
     )
 

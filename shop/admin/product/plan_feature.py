@@ -9,6 +9,7 @@ class PlanFeatureAdmin(admin.ModelAdmin):
         "plan",
         "feature",
         "value",
+        "updated_at",
         "created_at",
     )
 

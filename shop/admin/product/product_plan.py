@@ -9,12 +9,15 @@ class ProductPlanAdmin(admin.ModelAdmin):
         "title",
         "product",
         "price",
+        "is_available",
         "is_active",
+        "updated_at",
         "created_at",
     )
 
     list_filter = (
         "product",
+        "is_available",
         "is_active",
     )
 

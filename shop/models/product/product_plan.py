@@ -25,6 +25,7 @@ class ProductPlanModel(models.Model):
 
     price = models.PositiveBigIntegerField()
 
+    is_available = models.BooleanField(default=True)
     is_active = models.BooleanField(default=True)
 
     updated_at = models.DateTimeField(auto_now=True)
