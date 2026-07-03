@@ -40,4 +40,4 @@ class OrderModel(models.Model):
         verbose_name_plural = "Orders"
 
     def __str__(self):
-        return f"Order #{self.id}"
+        return f"Order #{str(self.id)[:8]} - {self.user.email}"

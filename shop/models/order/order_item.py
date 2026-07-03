@@ -43,4 +43,4 @@ class OrderItemModel(models.Model):
         verbose_name_plural = "Order Items"
 
     def __str__(self):
-        return f"{self.product.title} - {self.plan.title} x {self.quantity}"
+        return f"{self.product.title} - {self.plan.title} x {self.quantity} for {self.order.user.email}"

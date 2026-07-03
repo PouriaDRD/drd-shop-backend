@@ -45,22 +45,22 @@ class ProductPlanAdmin(admin.ModelAdmin):
         "make_unavailable",
     ]
 
-    @admin.action(description="فعال کردن پلن‌های انتخاب‌شده")
+    @admin.action()
     def make_active(self, request, queryset):
         updated = queryset.update(is_active=True)
-        self.message_user(request, f"{updated} پلن فعال شد.")
+        self.message_user(request, f"{updated} activated")
 
-    @admin.action(description="غیرفعال کردن پلن‌های انتخاب‌شده")
+    @admin.action()
     def make_inactive(self, request, queryset):
         updated = queryset.update(is_active=False)
-        self.message_user(request, f"{updated} پلن غیرفعال شد.")
+        self.message_user(request, f"{updated} deactivated")
 
-    @admin.action(description="در دسترس کردن پلن‌های انتخاب‌شده")
+    @admin.action()
     def make_available(self, request, queryset):
         updated = queryset.update(is_available=True)
-        self.message_user(request, f"{updated} پلن در دسترس شد.")
+        self.message_user(request, f"{updated} are available")
 
-    @admin.action(description="غیرفعال کردن دسترسی پلن‌های انتخاب‌شده")
+    @admin.action()
     def make_unavailable(self, request, queryset):
         updated = queryset.update(is_available=False)
-        self.message_user(request, f"{updated} پلن از دسترس خارج شد.")
+        self.message_user(request, f"{updated} are not available")

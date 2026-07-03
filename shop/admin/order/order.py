@@ -6,7 +6,6 @@ from shop.models import OrderModel
 @admin.register(OrderModel)
 class OrderAdmin(admin.ModelAdmin):
     list_display = (
-        "id",
         "user",
         "status",
         "total_price",

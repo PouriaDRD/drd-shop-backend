@@ -2,7 +2,7 @@ from django.contrib import admin
 
 from finance.models import LedgerEntryModel
 
-DEV = True
+DEV = False
 
 
 @admin.register(LedgerEntryModel)
