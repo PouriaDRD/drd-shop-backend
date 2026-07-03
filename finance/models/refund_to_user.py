@@ -72,6 +72,18 @@ class RefundToUserRequestModel(models.Model):
         default=DepositPaymentMethod.CARD_TO_CARD,
     )
 
+    reference_number = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+    )
+
+    tracking_code = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+    )
+
     receiver_name = models.CharField(
         max_length=255,
     )
