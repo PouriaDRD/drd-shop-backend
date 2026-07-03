@@ -13,10 +13,5 @@ class CardSerializer(serializers.ModelSerializer):
             "updated_at",
             "created_at",
         )
-        read_only_fields = (
-            "id",
-            "owner_name",
-            "owner_card_number",
-            "updated_at",
-            "created_at",
-        )
+
+        read_only_fields = ["__all__"]

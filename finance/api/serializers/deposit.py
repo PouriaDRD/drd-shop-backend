@@ -207,4 +207,4 @@ class DepositRetrieveSerializer(serializers.ModelSerializer):
             "is_processed",
             "created_at",
         )
-        read_only_fields = fields
+        read_only_fields = ["__all__"]

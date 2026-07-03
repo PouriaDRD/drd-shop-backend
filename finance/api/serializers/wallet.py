@@ -12,4 +12,4 @@ class WalletSerializer(serializers.ModelSerializer):
     class Meta:
         model = WalletModel
         fields = ("balance",)
-        read_only_fields = ("__all__",)
+        read_only_fields = ["__all__"]

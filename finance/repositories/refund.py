@@ -1,11 +1,12 @@
 from django.db import transaction
 from django.utils import timezone
+from django.db.models import QuerySet
+
 
 from finance.models import (
     RefundToWalletRequestModel,
     RefundToUserRequestModel,
 )
-
 from finance.enums import (
     RefundToWalletStatus,
     RefundToUserStatus,
@@ -28,6 +29,20 @@ class RefundRepository:
     @staticmethod
     def get_wallet_refund_by_id(refund_id):
         return RefundToWalletRequestModel.objects.filter(id=refund_id).first()
+
+    @staticmethod
+    def get_wallet_refunds_to_wallet(
+        wallet_id: int,
+    ) -> QuerySet[RefundToWalletRequestModel]:
+        return (
+            RefundToWalletRequestModel.objects.filter(wallet_id=wallet_id)
+            .select_related(
+                "wallet",
+                "wallet__user",
+                "transaction",
+            )
+            .order_by("-created_at")
+        )
 
     @staticmethod
     def lock_wallet_refund(refund_id):
