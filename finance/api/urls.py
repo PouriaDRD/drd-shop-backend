@@ -2,10 +2,11 @@ from django.urls import path
 
 from finance.api.views import (
     CardListAPIView,
-    DepositCreateAPIView,
     DepositListAPIView,
-    TransactionListAPIView,
+    DepositCreateAPIView,
     WalletRetrieveAPIView,
+    TransactionListAPIView,
+    RefundToUserListAPIView,
     RefundToWalletListAPIView,
 )
 
@@ -19,5 +20,10 @@ urlpatterns = [
         "my-refund-to-wallet/",
         RefundToWalletListAPIView.as_view(),
         name="my-refund-to-wallet",
+    ),
+    path(
+        "my-refund-to-user/",
+        RefundToUserListAPIView.as_view(),
+        name="my-refund-to-user",
     ),
 ]

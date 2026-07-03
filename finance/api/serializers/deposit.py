@@ -5,13 +5,6 @@ from finance.models import DepositRequestModel
 from finance.enums import DepositPaymentMethod
 
 
-from rest_framework import serializers
-
-from finance.models import DepositRequestModel
-from finance.enums import DepositPaymentMethod
-from finance.services import DepositService
-
-
 class DepositCreateSerializer(serializers.ModelSerializer):
     """
     Serializer for creating a deposit request.

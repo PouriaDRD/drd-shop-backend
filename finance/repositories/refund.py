@@ -32,10 +32,22 @@ class RefundRepository:
 
     @staticmethod
     def get_wallet_refunds_to_wallet(
-        wallet_id: int,
+        wallet_id,
     ) -> QuerySet[RefundToWalletRequestModel]:
         return (
             RefundToWalletRequestModel.objects.filter(wallet_id=wallet_id)
+            .select_related(
+                "wallet",
+                "wallet__user",
+                "transaction",
+            )
+            .order_by("-created_at")
+        )
+
+    @staticmethod
+    def get_wallet_refunds_to_user(wallet_id) -> QuerySet[RefundToUserRequestModel]:
+        return (
+            RefundToUserRequestModel.objects.filter(wallet_id=wallet_id)
             .select_related(
                 "wallet",
                 "wallet__user",
