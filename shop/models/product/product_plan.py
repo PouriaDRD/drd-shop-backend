@@ -23,6 +23,11 @@ class ProductPlanModel(models.Model):
 
     title = models.CharField(max_length=255)  # "Germany 30 days 100GB"
 
+    description = models.TextField(
+        blank=True,
+        null=True,
+    )
+
     price = models.PositiveBigIntegerField()
 
     is_available = models.BooleanField(default=True)

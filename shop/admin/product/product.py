@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.utils.translation import gettext_lazy as _
 
 from shop.models import ProductModel
 
@@ -59,3 +60,19 @@ class ProductAdmin(admin.ModelAdmin):
             },
         ),
     )
+
+    # =========================
+    # ACTIONS
+    # =========================
+
+    actions = ["make_active", "make_inactive"]
+
+    @admin.action(description="فعال کردن محصولات انتخاب‌شده")
+    def make_active(self, request, queryset):
+        updated = queryset.update(is_active=True)
+        self.message_user(request, f"{updated} محصول فعال شد.")
+
+    @admin.action(description="غیرفعال کردن محصولات انتخاب‌شده")
+    def make_inactive(self, request, queryset):
+        updated = queryset.update(is_active=False)
+        self.message_user(request, f"{updated} محصول غیرفعال شد.")
