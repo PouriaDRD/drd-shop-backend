@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     "authentication",
     "notifications",
     "finance",
+    "shop",
 ]
 
 # ---------------------------------------------------------------
