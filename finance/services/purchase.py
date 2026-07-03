@@ -80,7 +80,7 @@ class PurchaseService:
             amount=-purchase.amount,
             transaction_type=TransactionType.PURCHASE,
             status=TransactionStatus.APPROVED,
-            description="Purchase approved.",
+            description=purchase.reason or "تراکنش خرید",
         )
 
         LedgerRepository.create(

@@ -43,7 +43,11 @@ class TransactionModel(models.Model):
         default=TransactionStatus.PENDING,
     )
 
-    description = models.TextField(blank=True)
+    description = models.TextField(
+        blank=True,
+        null=True,
+        help_text="Optional description.",
+    )
 
     is_processed = models.BooleanField(
         default=False,

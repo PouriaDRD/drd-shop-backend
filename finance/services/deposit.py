@@ -86,7 +86,7 @@ class DepositService:
             amount=deposit.amount,
             transaction_type=TransactionType.DEPOSIT,
             status=TransactionStatus.APPROVED,
-            description="Deposit approved.",
+            description=deposit.note or "تراکنش واریز",
         )
 
         LedgerRepository.create(

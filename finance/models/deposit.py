@@ -102,6 +102,7 @@ class DepositRequestModel(models.Model):
     note = models.TextField(
         blank=True,
         null=True,
+        help_text="User note.",
     )
 
     status = models.CharField(
@@ -112,6 +113,8 @@ class DepositRequestModel(models.Model):
 
     admin_note = models.TextField(
         blank=True,
+        null=True,
+        help_text="Internal note.",
     )
 
     is_processed = models.BooleanField(

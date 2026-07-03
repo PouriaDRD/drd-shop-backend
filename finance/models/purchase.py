@@ -44,8 +44,16 @@ class PurchaseRequestModel(models.Model):
         default=PurchaseStatus.PENDING,
     )
 
+    reason = models.TextField(
+        blank=True,
+        null=True,
+        help_text="Reason for issuing the purchase.",
+    )
+
     admin_note = models.TextField(
         blank=True,
+        null=True,
+        help_text="Internal note.",
     )
 
     is_processed = models.BooleanField(

@@ -3,6 +3,7 @@ from django.urls import path
 from finance.api.views import (
     CardListAPIView,
     DepositListAPIView,
+    PurchaseListAPIView,
     DepositCreateAPIView,
     WalletRetrieveAPIView,
     TransactionListAPIView,
@@ -16,6 +17,7 @@ urlpatterns = [
     path("my-deposits/", DepositListAPIView.as_view(), name="my-deposits"),
     path("request-deposit/", DepositCreateAPIView.as_view(), name="request-deposit"),
     path("my-transactions/", TransactionListAPIView.as_view(), name="my-transactions"),
+    path("my-purchases/", PurchaseListAPIView.as_view(), name="my-purchases"),
     path(
         "my-refund-to-wallet/",
         RefundToWalletListAPIView.as_view(),

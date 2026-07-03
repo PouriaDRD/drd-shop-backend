@@ -44,7 +44,7 @@ class RefundService:
             amount=refund.amount,
             transaction_type=TransactionType.REFUND_TO_WALLET,
             status=TransactionStatus.APPROVED,
-            description=refund.reason,
+            description=refund.reason or "تراکنش استرداد",
         )
 
         LedgerRepository.create(
@@ -104,7 +104,7 @@ class RefundService:
             amount=refund.amount,
             transaction_type=TransactionType.REFUND_TO_USER,
             status=TransactionStatus.APPROVED,
-            description=refund.reason,
+            description=refund.reason or "تراکنش استرداد",
         )
 
         LedgerRepository.create(

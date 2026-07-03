@@ -49,11 +49,14 @@ class RefundToWalletRequestModel(models.Model):
     amount = models.PositiveBigIntegerField()
 
     reason = models.TextField(
+        blank=True,
+        null=True,
         help_text="Reason for issuing the refund.",
     )
 
     admin_note = models.TextField(
         blank=True,
+        null=True,
         help_text="Internal note.",
     )
 
