@@ -1,6 +1,7 @@
 import uuid
 from django.db import models
 
+from ..product import ProductModel
 from shop.enums import DiscountType
 
 
@@ -63,6 +64,11 @@ class CouponModel(models.Model):
 
     is_active = models.BooleanField(
         default=True,
+    )
+
+    allowed_products = models.ManyToManyField(
+        ProductModel,
+        blank=True,
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
