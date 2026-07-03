@@ -6,8 +6,8 @@ from shop.models import FeatureModel
 @admin.register(FeatureModel)
 class FeatureAdmin(admin.ModelAdmin):
     list_display = (
-        "title",
         "key",
+        "title",
         "value_type",
         "created_at",
     )
