@@ -8,6 +8,7 @@ class CardAdmin(admin.ModelAdmin):
     list_display = (
         "owner_name",
         "owner_card_number",
+        "is_active",
         "updated_at",
         "created_at",
     )

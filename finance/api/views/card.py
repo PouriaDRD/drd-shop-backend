@@ -17,7 +17,7 @@ class CardListAPIView(ListAPIView):
 
     serializer_class = CardSerializer
 
-    queryset = CardModel.objects.all()
+    queryset = CardModel.objects.all().filter(is_active=True)
     permission_classes = [IsAuthenticated]
 
     throttle_scope = "user"
