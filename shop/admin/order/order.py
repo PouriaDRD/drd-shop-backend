@@ -1,14 +1,18 @@
 from django.contrib import admin
 
 from shop.models import OrderModel
+from .order_item import OrderItemInline
 
 
 @admin.register(OrderModel)
 class OrderAdmin(admin.ModelAdmin):
+    inlines = (OrderItemInline,)
+
     list_display = (
         "user",
         "status",
         "total_price",
+        "updated_at",
         "created_at",
     )
 

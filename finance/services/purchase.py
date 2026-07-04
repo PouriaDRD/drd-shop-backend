@@ -42,10 +42,40 @@ class PurchaseService:
     """
 
     @staticmethod
+    @transaction.atomic
     def create(**validated_data) -> PurchaseRequestModel:
         """
         Create purchase request.
         """
+
+        amount = int(validated_data["amount"])
+        reason = validated_data.get("reason", "تراکنش خرید")
+        wallet = WalletRepository.lock(validated_data["wallet"].id)
+
+        if wallet.balance < amount:
+            raise ValidationError("موجودی کافی نیست")
+
+        transaction_obj = TransactionRepository.create(
+            wallet=wallet,
+            amount=amount,
+            transaction_type=TransactionType.PURCHASE,
+            status=TransactionStatus.PENDING,
+            description=reason,
+        )
+
+        balance_before = wallet.balance
+        balance_after = balance_before - amount
+
+        LedgerRepository.create(
+            wallet=wallet,
+            transaction=transaction_obj,
+            transaction_type=TransactionType.PURCHASE,
+            amount=-amount,
+            balance_before=balance_before,
+            balance_after=balance_after,
+        )
+
+        validated_data["transaction"] = transaction_obj
 
         purchase = PurchaseRepository.create(**validated_data)
 
@@ -65,41 +95,17 @@ class PurchaseService:
         purchase = PurchaseRepository.lock(purchase_id)
 
         if purchase.is_processed:
-            raise ValidationError("Purchase already processed.")
+            raise ValidationError("قبلا بررسی شده است.")
 
-        wallet = WalletRepository.lock(purchase.wallet.id)
-
-        if wallet.balance < purchase.amount:
-            raise ValidationError("Insufficient balance.")
-
-        balance_before = wallet.balance
-        balance_after = balance_before - purchase.amount
-
-        transaction_obj = TransactionRepository.create(
-            wallet=wallet,
-            amount=-purchase.amount,
-            transaction_type=TransactionType.PURCHASE,
-            status=TransactionStatus.APPROVED,
-            description=purchase.reason or "تراکنش خرید",
-        )
-
-        LedgerRepository.create(
-            wallet=wallet,
-            transaction=transaction_obj,
-            transaction_type=TransactionType.PURCHASE,
-            amount=-purchase.amount,
-            balance_before=balance_before,
-            balance_after=balance_after,
-        )
-
-        purchase.transaction = transaction_obj
         purchase.status = PurchaseStatus.APPROVED
         purchase.is_processed = True
         purchase.reviewed_at = timezone.now()
 
+        if purchase.transaction:
+            TransactionRepository.approve(purchase.transaction)
+
         purchase.save(
             update_fields=[
-                "transaction",
                 "status",
                 "is_processed",
                 "reviewed_at",
@@ -108,7 +114,7 @@ class PurchaseService:
         )
 
         logger.info(
-            f"Purchase approved | id={purchase.id} transaction={transaction_obj.id}",
+            f"Purchase approved | id={purchase.id}",
         )
 
         return purchase

@@ -1,6 +1,6 @@
 from django.db import transaction
+from django.utils import timezone
 from django.db.models import QuerySet
-
 from finance.enums import TransactionStatus, TransactionType
 from finance.models import TransactionModel, WalletModel
 
@@ -102,10 +102,12 @@ class TransactionRepository:
         """
 
         transaction_obj.is_processed = True
+        transaction_obj.reviewed_at = timezone.now()
 
         transaction_obj.save(
             update_fields=[
                 "is_processed",
+                "reviewed_at",
                 "updated_at",
             ]
         )
@@ -122,11 +124,13 @@ class TransactionRepository:
         """
 
         transaction_obj.status = TransactionStatus.APPROVED
-        transaction_obj.is_processed = True
+
+        TransactionRepository.mark_processed(transaction_obj)
 
         transaction_obj.save(
             update_fields=[
                 "status",
+                "reviewed_at",
                 "is_processed",
                 "reviewed_at",
                 "updated_at",
@@ -145,11 +149,12 @@ class TransactionRepository:
         """
 
         transaction_obj.status = TransactionStatus.REJECTED
-        transaction_obj.is_processed = True
+        TransactionRepository.mark_processed(transaction_obj)
 
         transaction_obj.save(
             update_fields=[
                 "status",
+                "reviewed_at",
                 "is_processed",
                 "reviewed_at",
                 "updated_at",

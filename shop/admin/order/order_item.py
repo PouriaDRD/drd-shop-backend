@@ -3,6 +3,20 @@ from django.contrib import admin
 from shop.models import OrderItemModel
 
 
+class OrderItemInline(admin.TabularInline):
+    model = OrderItemModel
+    extra = 0
+    readonly_fields = (
+        "id",
+        "product",
+        "plan",
+        "quantity",
+        "price",
+        "created_at",
+        "updated_at",
+    )
+
+
 @admin.register(OrderItemModel)
 class OrderItemAdmin(admin.ModelAdmin):
     list_display = (

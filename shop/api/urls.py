@@ -6,6 +6,7 @@ from shop.api.views.cart import (
     AddCartItemAPIView,
     UpdateCartItemAPIView,
     DeleteCartItemAPIView,
+    CheckoutCreateAPIView,
 )
 from shop.api.views.coupon import (
     ApplyCouponAPIView,
@@ -32,6 +33,7 @@ urlpatterns = [
         DeleteCartItemAPIView.as_view(),
         name="delete-cart-item",
     ),
+    path("checkout/", CheckoutCreateAPIView.as_view(), name="checkout"),
     # Coupons
     path("my-cart/apply-coupon/", ApplyCouponAPIView.as_view()),
     path("my-cart/remove-coupon/", RemoveCouponAPIView.as_view()),

@@ -46,6 +46,7 @@ class RefundService:
             status=TransactionStatus.APPROVED,
             description=refund.reason or "تراکنش استرداد",
         )
+        TransactionRepository.approve(transaction_obj)
 
         LedgerRepository.create(
             wallet=wallet,
@@ -57,6 +58,7 @@ class RefundService:
         )
 
         refund.transaction = transaction_obj
+        refund.save(update_fields=["transaction"])
 
         RefundRepository.mark_wallet_refund_approved(refund)
 
@@ -107,6 +109,8 @@ class RefundService:
             description=refund.reason or "تراکنش استرداد",
         )
 
+        TransactionRepository.approve(transaction_obj)
+
         LedgerRepository.create(
             wallet=wallet,
             transaction=transaction_obj,
@@ -117,6 +121,7 @@ class RefundService:
         )
 
         refund.transaction = transaction_obj
+        refund.save(update_fields=["transaction"])
 
         RefundRepository.mark_user_refund_approved(refund)
 

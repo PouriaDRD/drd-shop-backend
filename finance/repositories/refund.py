@@ -119,7 +119,13 @@ class RefundRepository:
         refund.is_processed = True
         refund.reviewed_at = timezone.now()
         refund.save(
-            update_fields=["status", "is_processed", "reviewed_at", "updated_at"]
+            update_fields=[
+                "status",
+                "transaction",
+                "is_processed",
+                "reviewed_at",
+                "updated_at",
+            ]
         )
         return refund
 
