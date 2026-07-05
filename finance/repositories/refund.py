@@ -4,6 +4,7 @@ from django.db.models import QuerySet
 
 
 from finance.models import (
+    TransactionModel,
     RefundToWalletRequestModel,
     RefundToUserRequestModel,
 )
@@ -66,18 +67,25 @@ class RefundRepository:
 
     @staticmethod
     @transaction.atomic
-    def mark_wallet_refund_approved(refund: RefundToWalletRequestModel):
+    def approve_wallet_refund(refund: RefundToWalletRequestModel, tx: TransactionModel):
+        refund.transaction = tx
         refund.status = RefundToWalletStatus.APPROVED
         refund.is_processed = True
         refund.reviewed_at = timezone.now()
         refund.save(
-            update_fields=["status", "is_processed", "reviewed_at", "updated_at"]
+            update_fields=[
+                "status",
+                "transaction",
+                "is_processed",
+                "reviewed_at",
+                "updated_at",
+            ]
         )
         return refund
 
     @staticmethod
     @transaction.atomic
-    def mark_wallet_refund_rejected(refund: RefundToWalletRequestModel, note=""):
+    def reject_wallet_refund(refund: RefundToWalletRequestModel, note=""):
         refund.status = RefundToWalletStatus.REJECTED
         refund.is_processed = True
         refund.admin_note = note
@@ -114,7 +122,8 @@ class RefundRepository:
 
     @staticmethod
     @transaction.atomic
-    def mark_user_refund_approved(refund: RefundToUserRequestModel):
+    def approve_user_refund(refund: RefundToUserRequestModel, tx: TransactionModel):
+        refund.transaction = tx
         refund.status = RefundToUserStatus.APPROVED
         refund.is_processed = True
         refund.reviewed_at = timezone.now()
@@ -131,7 +140,7 @@ class RefundRepository:
 
     @staticmethod
     @transaction.atomic
-    def mark_user_refund_rejected(refund: RefundToUserRequestModel, note=""):
+    def reject_user_refund(refund: RefundToUserRequestModel, note=""):
         refund.status = RefundToUserStatus.REJECTED
         refund.is_processed = True
         refund.admin_note = note

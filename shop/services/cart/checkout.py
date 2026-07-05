@@ -3,12 +3,10 @@ from django.db.models import QuerySet
 from rest_framework.exceptions import ValidationError
 
 from accounts.models import UserModel
-from finance.services import PurchaseService
 
-from shop.enums import OrderStatus
+from shop.services.order import OrderService
 from shop.repositories.cart import CartRepository
-from shop.models import CartItemModel, OrderItemModel, OrderModel
-from shop.repositories.order import OrderItemRepository, OrderRepository
+from shop.models import CartItemModel, OrderModel
 
 
 class CheckoutService:
@@ -44,40 +42,23 @@ class CheckoutService:
         if wallet.balance < cart.total_price:
             raise ValidationError("موجودی کافی نیست")
 
-        order = OrderRepository.create(
-            user=user,
-            status=OrderStatus.PENDING,
-            total_price=cart.total_price,
+        order = OrderService.place_order(
+            user,
+            items,
+            cart.total_price,
         )
 
-        order_items: list[OrderItemModel] = []
-
-        for item in items:
-            order_items.append(
-                OrderItemModel(
-                    order=order,
-                    product=item.product,
-                    plan=item.plan,
-                    quantity=item.quantity,
-                    price=item.unit_price,
-                )
-            )
-        OrderItemRepository.bulk_create(order_items)
+        from finance.services.purchase import PurchaseService
 
         PurchaseService.create(
             wallet=wallet,
             amount=cart.total_price,
-            reason="خرید محصول",
+            reason=f"خرید #{str(order.id)[:8]}",  # type: ignore
+            order=order,
         )
 
         # reset cart
         items.delete()
-
-        cart.coupon = None
-        cart.subtotal = 0
-        cart.discount = 0
-        cart.total_price = 0
-
-        CartRepository.save(cart)
+        CartRepository.reset_cart(cart)
 
         return order

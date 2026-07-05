@@ -19,8 +19,8 @@ class TransactionRepository:
         wallet: WalletModel,
         amount: int,
         transaction_type: TransactionType,
-        description: str = "",
         status: TransactionStatus = TransactionStatus.PENDING,
+        description: str = "",
     ) -> TransactionModel:
         """
         Create a transaction.
@@ -40,8 +40,8 @@ class TransactionRepository:
             wallet=wallet,
             amount=amount,
             type=transaction_type,
-            description=description,
             status=status,
+            description=description,
         )
 
     @staticmethod
@@ -72,28 +72,9 @@ class TransactionRepository:
 
     @staticmethod
     @transaction.atomic
-    def update_status(
-        transaction_obj: TransactionModel,
-        status: TransactionStatus,
-    ) -> TransactionModel:
-        """
-        Update transaction status.
-        """
-
-        transaction_obj.status = status
-        transaction_obj.save(
-            update_fields=[
-                "status",
-                "updated_at",
-            ]
-        )
-
-        return transaction_obj
-
-    @staticmethod
-    @transaction.atomic
     def mark_processed(
         transaction_obj: TransactionModel,
+        status: TransactionStatus,
     ) -> TransactionModel:
         """
         Mark transaction as processed.
@@ -103,9 +84,11 @@ class TransactionRepository:
 
         transaction_obj.is_processed = True
         transaction_obj.reviewed_at = timezone.now()
+        transaction_obj.status = status
 
         transaction_obj.save(
             update_fields=[
+                "status",
                 "is_processed",
                 "reviewed_at",
                 "updated_at",
@@ -123,9 +106,9 @@ class TransactionRepository:
         Approve transaction.
         """
 
-        transaction_obj.status = TransactionStatus.APPROVED
-
-        TransactionRepository.mark_processed(transaction_obj)
+        TransactionRepository.mark_processed(
+            transaction_obj, TransactionStatus.APPROVED
+        )
 
         transaction_obj.save(
             update_fields=[
@@ -148,8 +131,9 @@ class TransactionRepository:
         Reject transaction.
         """
 
-        transaction_obj.status = TransactionStatus.REJECTED
-        TransactionRepository.mark_processed(transaction_obj)
+        TransactionRepository.mark_processed(
+            transaction_obj, TransactionStatus.REJECTED
+        )
 
         transaction_obj.save(
             update_fields=[

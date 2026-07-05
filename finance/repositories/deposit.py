@@ -1,4 +1,5 @@
 from django.db import transaction
+from django.utils import timezone
 from django.db.models import QuerySet
 
 from finance.enums import DepositStatus
@@ -116,13 +117,16 @@ class DepositRepository:
     @transaction.atomic
     def approve(
         deposit: DepositRequestModel,
+        tx: TransactionModel,
     ) -> DepositRequestModel:
         """
         Mark deposit as approved.
         """
 
-        deposit.status = DepositStatus.APPROVED
         deposit.is_processed = True
+        deposit.status = DepositStatus.APPROVED
+        deposit.reviewed_at = timezone.now()
+        deposit.transaction = tx
 
         deposit.save(
             update_fields=[
@@ -130,6 +134,7 @@ class DepositRepository:
                 "is_processed",
                 "reviewed_at",
                 "updated_at",
+                "transaction",
             ]
         )
 
@@ -145,9 +150,10 @@ class DepositRepository:
         Mark deposit as rejected.
         """
 
-        deposit.status = DepositStatus.REJECTED
         deposit.is_processed = True
         deposit.admin_note = admin_note
+        deposit.status = DepositStatus.REJECTED
+        deposit.reviewed_at = timezone.now()
 
         deposit.save(
             update_fields=[

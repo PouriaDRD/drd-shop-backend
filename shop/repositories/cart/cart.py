@@ -1,7 +1,7 @@
-from django.db.models import QuerySet
+from django.db import transaction
 
-from accounts.models import UserModel
 from shop.models import CartModel
+from accounts.models import UserModel
 
 
 class CartRepository:
@@ -10,6 +10,7 @@ class CartRepository:
     """
 
     @staticmethod
+    @transaction.atomic
     def get_or_create(user: UserModel):
         cart, created = CartModel.objects.get_or_create(user=user)
         return cart
@@ -28,6 +29,7 @@ class CartRepository:
         )
 
     @staticmethod
+    @transaction.atomic
     def save(cart: CartModel) -> CartModel:
         cart.save(
             update_fields=[
@@ -38,3 +40,13 @@ class CartRepository:
             ]
         )
         return cart
+
+    @staticmethod
+    @transaction.atomic
+    def reset_cart(cart: CartModel) -> CartModel:
+        cart.coupon = None
+        cart.subtotal = 0
+        cart.discount = 0
+        cart.total_price = 0
+
+        return CartRepository.save(cart)

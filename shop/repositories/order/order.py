@@ -1,4 +1,6 @@
+from django.db import transaction
 from accounts.models import UserModel
+
 from shop.enums import OrderStatus
 from shop.models import OrderModel
 
@@ -9,11 +11,12 @@ class OrderRepository:
     """
 
     @staticmethod
+    @transaction.atomic
     def create(
         *,
         user: UserModel,
         status: OrderStatus = OrderStatus.PENDING,
-        total_price: int = 0,
+        total_price,
     ) -> OrderModel:
         return OrderModel.objects.create(
             user=user,
@@ -37,3 +40,40 @@ class OrderRepository:
     def save(order: OrderModel) -> OrderModel:
         order.save()
         return order
+
+    @staticmethod
+    @transaction.atomic
+    def approve(order: OrderModel):
+        order.status = OrderStatus.PAID
+        order.save(
+            update_fields=[
+                "status",
+                "updated_at",
+            ]
+        )
+        return order
+
+    @staticmethod
+    @transaction.atomic
+    def reject(order: OrderModel):
+        order.status = OrderStatus.CANCELED
+        order.save(
+            update_fields=[
+                "status",
+                "updated_at",
+            ]
+        )
+        return order
+
+    @staticmethod
+    def lock(order_id: str) -> OrderModel:
+        return (
+            OrderModel.objects.select_for_update()
+            .prefetch_related(
+                "items",
+                "items__product",
+                "items__plan",
+                "items__plan__features__feature",
+            )
+            .get(id=order_id)
+        )

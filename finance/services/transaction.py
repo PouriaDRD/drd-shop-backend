@@ -1,7 +1,6 @@
 import logging
 
 from django.db import transaction
-from django.utils import timezone
 from rest_framework.exceptions import ValidationError
 
 from finance.enums import TransactionStatus, TransactionType
@@ -26,21 +25,24 @@ class TransactionService:
     """
 
     @staticmethod
+    @transaction.atomic
     def create(
         *,
         wallet: WalletModel,
         amount: int,
         transaction_type: TransactionType,
+        status: TransactionStatus = TransactionStatus.PENDING,
         description: str = "",
     ) -> TransactionModel:
         """
-        Create a pending transaction.
+        Create a transaction.
         """
 
         transaction_obj = TransactionRepository.create(
             wallet=wallet,
             amount=amount,
             transaction_type=transaction_type,
+            status=status,
             description=description,
         )
 
@@ -53,7 +55,7 @@ class TransactionService:
     @staticmethod
     @transaction.atomic
     def approve(
-        transaction_id,
+        transaction_id: str,
     ) -> TransactionModel:
         """
         Approve a transaction.
@@ -65,10 +67,11 @@ class TransactionService:
 
         transaction_obj = TransactionRepository.lock(transaction_id)
 
-        if transaction_obj.is_processed:
+        if (
+            transaction_obj.is_processed
+            or transaction_obj.status != TransactionStatus.PENDING
+        ):
             raise ValidationError("Transaction has already been processed.")
-
-        transaction_obj.reviewed_at = timezone.now()
 
         transaction_obj = TransactionRepository.approve(transaction_obj)
 
@@ -81,7 +84,7 @@ class TransactionService:
     @staticmethod
     @transaction.atomic
     def reject(
-        transaction_id,
+        transaction_id: str,
     ) -> TransactionModel:
         """
         Reject a transaction.
@@ -92,10 +95,11 @@ class TransactionService:
 
         transaction_obj = TransactionRepository.lock(transaction_id)
 
-        if transaction_obj.is_processed:
+        if (
+            transaction_obj.is_processed
+            or transaction_obj.status != TransactionStatus.PENDING
+        ):
             raise ValidationError("Transaction has already been processed.")
-
-        transaction_obj.reviewed_at = timezone.now()
 
         transaction_obj = TransactionRepository.reject(transaction_obj)
 
@@ -104,28 +108,6 @@ class TransactionService:
         )
 
         return transaction_obj
-
-    @staticmethod
-    def ensure_pending(
-        transaction_obj: TransactionModel,
-    ) -> None:
-        """
-        Ensure transaction is still pending.
-        """
-
-        if transaction_obj.status != TransactionStatus.PENDING:
-            raise ValidationError("Transaction is no longer pending.")
-
-    @staticmethod
-    def ensure_not_processed(
-        transaction_obj: TransactionModel,
-    ) -> None:
-        """
-        Ensure transaction has not been processed before.
-        """
-
-        if transaction_obj.is_processed:
-            raise ValidationError("Transaction has already been processed.")
 
     @staticmethod
     def ensure_type(

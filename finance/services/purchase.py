@@ -1,22 +1,16 @@
 import logging
 
 from django.db import transaction
-from django.utils import timezone
 from rest_framework.exceptions import ValidationError
 
-from finance.enums import (
-    TransactionType,
-    TransactionStatus,
-    PurchaseStatus,
-)
+from shop.services.order import OrderService
 from finance.models import PurchaseRequestModel
+from finance.enums import TransactionType, TransactionStatus
+from finance.repositories import PurchaseRepository, WalletRepository
 
-from finance.repositories import (
-    PurchaseRepository,
-    WalletRepository,
-    TransactionRepository,
-    LedgerRepository,
-)
+from .refund import RefundService
+from .ledger import LedgerService
+from .transaction import TransactionService
 
 logger = logging.getLogger("finance.purchase_service")
 
@@ -48,14 +42,14 @@ class PurchaseService:
         Create purchase request.
         """
 
+        wallet = validated_data["wallet"]
         amount = int(validated_data["amount"])
         reason = validated_data.get("reason", "تراکنش خرید")
-        wallet = WalletRepository.lock(validated_data["wallet"].id)
 
         if wallet.balance < amount:
             raise ValidationError("موجودی کافی نیست")
 
-        transaction_obj = TransactionRepository.create(
+        transaction_obj = TransactionService.create(
             wallet=wallet,
             amount=amount,
             transaction_type=TransactionType.PURCHASE,
@@ -63,16 +57,11 @@ class PurchaseService:
             description=reason,
         )
 
-        balance_before = wallet.balance
-        balance_after = balance_before - amount
-
-        LedgerRepository.create(
+        LedgerService.create(
             wallet=wallet,
             transaction=transaction_obj,
             transaction_type=TransactionType.PURCHASE,
             amount=-amount,
-            balance_before=balance_before,
-            balance_after=balance_after,
         )
 
         validated_data["transaction"] = transaction_obj
@@ -80,14 +69,14 @@ class PurchaseService:
         purchase = PurchaseRepository.create(**validated_data)
 
         logger.info(
-            f"Purchase created | id={purchase.id} wallet={purchase.wallet.id} amount={purchase.amount}",
+            f"Purchase request created: id={str(purchase.id)}, user={str(wallet.user)}, amount={purchase.amount}",
         )
 
         return purchase
 
     @staticmethod
     @transaction.atomic
-    def approve(purchase_id) -> PurchaseRequestModel:
+    def approve(purchase_id: str) -> PurchaseRequestModel:
         """
         Approve purchase and deduct wallet balance.
         """
@@ -95,33 +84,24 @@ class PurchaseService:
         purchase = PurchaseRepository.lock(purchase_id)
 
         if purchase.is_processed:
-            raise ValidationError("قبلا بررسی شده است.")
+            raise ValidationError("Purchase request has already been processed.")
 
-        purchase.status = PurchaseStatus.APPROVED
-        purchase.is_processed = True
-        purchase.reviewed_at = timezone.now()
+        PurchaseRepository.approve(purchase)
 
         if purchase.transaction:
-            TransactionRepository.approve(purchase.transaction)
+            TransactionService.approve(str(purchase.transaction.id))
 
-        purchase.save(
-            update_fields=[
-                "status",
-                "is_processed",
-                "reviewed_at",
-                "updated_at",
-            ]
-        )
+        OrderService.approve(str(purchase.order.id))
 
         logger.info(
-            f"Purchase approved | id={purchase.id}",
+            f"Purchase approved: id={str(purchase.id)}, user={str(purchase.wallet.user)}, amount={purchase.amount}",
         )
 
         return purchase
 
     @staticmethod
     @transaction.atomic
-    def reject(purchase_id, *, admin_note: str = "") -> PurchaseRequestModel:
+    def reject(purchase_id: str, *, admin_note: str = "") -> PurchaseRequestModel:
         """
         Reject purchase request.
         """
@@ -129,25 +109,26 @@ class PurchaseService:
         purchase = PurchaseRepository.lock(purchase_id)
 
         if purchase.is_processed:
-            raise ValidationError("Purchase already processed.")
+            raise ValidationError("Purchase request has already been processed.")
 
-        purchase.status = PurchaseStatus.REJECTED
-        purchase.is_processed = True
-        purchase.admin_note = admin_note
-        purchase.reviewed_at = timezone.now()
+        wallet = WalletRepository.lock(purchase.wallet.id)
+        amount = purchase.amount
+        refund_reason = "استرداد به دلیل رد تراکنش خرید"
 
-        purchase.save(
-            update_fields=[
-                "status",
-                "is_processed",
-                "admin_note",
-                "reviewed_at",
-                "updated_at",
-            ]
+        refund = RefundService.create_wallet_refund(
+            wallet=wallet,
+            amount=amount,
+            reason=refund_reason,
         )
 
+        RefundService.approve_wallet_refund(str(refund.id), purchase.transaction)
+
+        PurchaseRepository.reject(purchase, admin_note)
+
+        OrderService.reject(str(purchase.order.id))
+
         logger.info(
-            f"Purchase rejected | id={purchase.id}",
+            f"Purchase rejected | id={str(purchase.id)}, user={str(purchase.wallet.user)}, amount={purchase.amount}",
         )
 
         return purchase

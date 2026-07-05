@@ -2,6 +2,7 @@ import uuid
 from django.db import models
 
 from .wallet import WalletModel
+from shop.models import OrderModel
 from finance.enums import PurchaseStatus
 from .transaction import TransactionModel
 
@@ -34,6 +35,12 @@ class PurchaseRequestModel(models.Model):
         null=True,
         blank=True,
         related_name="purchase_request",
+    )
+
+    order = models.ForeignKey(
+        OrderModel,
+        on_delete=models.PROTECT,
+        related_name="purchase_requests",
     )
 
     amount = models.PositiveBigIntegerField()

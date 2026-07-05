@@ -1,4 +1,5 @@
 from django.db import transaction
+from django.utils import timezone
 from django.db.models import QuerySet
 
 from finance.enums import PurchaseStatus
@@ -49,7 +50,7 @@ class PurchaseRepository:
         )
 
     @staticmethod
-    def lock(purchase_id) -> PurchaseRequestModel:
+    def lock(purchase_id: str) -> PurchaseRequestModel:
         """
         Lock purchase row.
 
@@ -74,8 +75,9 @@ class PurchaseRepository:
         Mark purchase as approved.
         """
 
-        purchase.status = PurchaseStatus.APPROVED
         purchase.is_processed = True
+        purchase.reviewed_at = timezone.now()
+        purchase.status = PurchaseStatus.APPROVED
 
         purchase.save(
             update_fields=[
@@ -98,9 +100,10 @@ class PurchaseRepository:
         Mark purchase as rejected.
         """
 
-        purchase.status = PurchaseStatus.REJECTED
         purchase.is_processed = True
         purchase.admin_note = admin_note
+        purchase.reviewed_at = timezone.now()
+        purchase.status = PurchaseStatus.REJECTED
 
         purchase.save(
             update_fields=[

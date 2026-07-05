@@ -1,31 +1,25 @@
 from django.contrib import admin
+from django.utils.html import format_html
 
-from finance.models import (
-    RefundToUserRequestModel,
-)
-
+from finance.models import RefundToUserRequestModel
 from finance.services.refund import RefundService
-from finance.enums import (
-    RefundToUserStatus,
-)
+from finance.enums import RefundToUserStatus
 
 DEV = True
 
 
-# ========================================================
-# USER REFUND ADMIN
-# ========================================================
 @admin.register(RefundToUserRequestModel)
 class UserRefundAdmin(admin.ModelAdmin):
 
     list_display = (
+        "wallet__user__email",
         "receiver_name",
-        "receiver_card_number",
-        "amount",
-        "status",
+        "amount_display",
+        "status_badge",
         "transaction",
         "is_processed",
         "reviewed_at",
+        "updated_at",
         "created_at",
     )
 
@@ -52,11 +46,49 @@ class UserRefundAdmin(admin.ModelAdmin):
     )
 
     ordering = ("-created_at",)
-
     list_per_page = 25
 
     def has_delete_permission(self, request, obj=None):
         return DEV
+
+    # ---------------------------------------------------
+    # AMOUNT
+    # ---------------------------------------------------
+
+    @admin.display(description="Amount", ordering="amount")
+    def amount_display(self, obj):
+        amount = f"{obj.amount:,.0f}"
+
+        return format_html(
+            "<span>{}</span>",
+            amount,
+        )
+
+    # ---------------------------------------------------
+    # STATUS BADGE
+    # ---------------------------------------------------
+
+    @admin.display(description="Status", ordering="status")
+    def status_badge(self, obj):
+        colors = {
+            RefundToUserStatus.PENDING: ("#FFFBEB", "#92400E"),
+            RefundToUserStatus.APPROVED: ("#ECFDF5", "#065F46"),
+            RefundToUserStatus.REJECTED: ("#FEF2F2", "#991B1B"),
+            RefundToUserStatus.CANCELLED: ("#F3F4F6", "#374151"),
+        }
+
+        bg, fg = colors.get(obj.status, ("#F3F4F6", "#374151"))
+
+        return format_html(
+            '<span style="background:{};color:{};padding:3px 10px;border-radius:999px;font-size:11px;font-weight:600;display:inline-block;">{}</span>',
+            bg,
+            fg,
+            obj.get_status_display(),
+        )
+
+    # ---------------------------------------------------
+    # ACTIONS
+    # ---------------------------------------------------
 
     actions = ["approve", "reject"]
 

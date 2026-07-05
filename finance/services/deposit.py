@@ -1,21 +1,14 @@
 import logging
 
 from django.db import transaction
-from django.utils import timezone
 from rest_framework.exceptions import ValidationError
 
-from finance.enums import (
-    DepositStatus,
-    TransactionStatus,
-    TransactionType,
-)
 from finance.models import DepositRequestModel, WalletModel
-from finance.repositories import (
-    DepositRepository,
-    LedgerRepository,
-    TransactionRepository,
-    WalletRepository,
-)
+from finance.enums import TransactionStatus, TransactionType
+from finance.repositories import DepositRepository, WalletRepository
+
+from .ledger import LedgerService
+from .transaction import TransactionService
 
 logger = logging.getLogger("finance.deposit_service")
 
@@ -37,7 +30,7 @@ class DepositService:
         deposit = DepositRepository.create(wallet, **validated_data)
 
         logger.info(
-            f"Deposit request created | id={deposit.id} amount={deposit.amount}",
+            f"Deposit request created | id={str(deposit.id)} amount={deposit.amount}",
         )
 
         return deposit
@@ -74,49 +67,31 @@ class DepositService:
         if deposit.is_processed:
             raise ValidationError("Deposit request has already been processed.")
 
-        wallet = WalletRepository.lock(
-            deposit.wallet.id,
-        )
+        wallet = WalletRepository.lock(deposit.wallet.id)
 
-        balance_before = wallet.balance
-        balance_after = balance_before + deposit.amount
+        amount = deposit.amount
 
-        transaction_obj = TransactionRepository.create(
+        transaction_obj = TransactionService.create(
             wallet=wallet,
-            amount=deposit.amount,
+            amount=amount,
             transaction_type=TransactionType.DEPOSIT,
-            status=TransactionStatus.APPROVED,
+            status=TransactionStatus.PENDING,
             description="تراکنش واریز",
         )
 
-        TransactionRepository.approve(transaction_obj)
+        TransactionService.approve(str(transaction_obj.id))
 
-        LedgerRepository.create(
+        LedgerService.create(
             wallet=wallet,
             transaction=transaction_obj,
             transaction_type=TransactionType.DEPOSIT,
-            amount=deposit.amount,
-            balance_before=balance_before,
-            balance_after=balance_after,
+            amount=amount,
         )
 
-        deposit.transaction = transaction_obj
-        deposit.status = DepositStatus.APPROVED
-        deposit.is_processed = True
-        deposit.reviewed_at = timezone.now()
-
-        deposit.save(
-            update_fields=[
-                "transaction",
-                "status",
-                "is_processed",
-                "reviewed_at",
-                "updated_at",
-            ]
-        )
+        DepositRepository.approve(deposit, transaction_obj)
 
         logger.info(
-            f"Deposit approved | deposit={deposit.id} transaction={transaction_obj.id}",
+            f"Deposit approved: id={str(deposit.id)}, user={str(deposit.wallet.user)}, amount={amount}",
         )
 
         return deposit
@@ -141,23 +116,10 @@ class DepositService:
         if deposit.is_processed:
             raise ValidationError("Deposit request has already been processed.")
 
-        deposit.admin_note = admin_note
-        deposit.status = DepositStatus.REJECTED
-        deposit.is_processed = True
-        deposit.reviewed_at = timezone.now()
-
-        deposit.save(
-            update_fields=[
-                "admin_note",
-                "status",
-                "is_processed",
-                "reviewed_at",
-                "updated_at",
-            ]
-        )
+        DepositRepository.reject(deposit, admin_note)
 
         logger.info(
-            f"Deposit rejected | deposit={deposit.id}",
+            f"Deposit rejected: id={str(deposit.id)}, user={str(deposit.wallet.user)}",
         )
 
         return deposit

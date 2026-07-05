@@ -1,4 +1,5 @@
 import logging
+from django.db import transaction
 
 from finance.enums import TransactionType
 from finance.repositories import LedgerRepository
@@ -17,7 +18,8 @@ class LedgerService:
     """
 
     @staticmethod
-    def create_entry(
+    @transaction.atomic
+    def create(
         *,
         wallet: WalletModel,
         transaction: TransactionModel,
@@ -40,7 +42,12 @@ class LedgerService:
         """
 
         balance_before = wallet.balance
-        balance_after = balance_before + amount
+        balance_after = 0
+
+        if amount > 0:
+            balance_after = balance_before + amount
+        elif amount < 0:
+            balance_after = balance_before - amount
 
         ledger = LedgerRepository.create(
             wallet=wallet,

@@ -1,4 +1,5 @@
 import logging
+from django.db import transaction
 from rest_framework.exceptions import ValidationError
 
 from accounts.models import UserModel
@@ -21,6 +22,7 @@ class WalletService:
     """
 
     @staticmethod
+    @transaction.atomic
     def create(user: UserModel) -> WalletModel:
         """
         Create a wallet for a user.

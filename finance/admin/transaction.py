@@ -1,19 +1,20 @@
 from django.contrib import admin
+from django.utils.html import format_html
 
 from finance.models import TransactionModel
-from finance.enums import TransactionStatus
+from finance.enums import TransactionStatus, TransactionType
 from finance.services import TransactionService
 
-DEV = True
+DEV = False
 
 
 @admin.register(TransactionModel)
 class TransactionAdmin(admin.ModelAdmin):
     list_display = (
         "wallet",
-        "type",
-        "amount",
-        "status",
+        "amount_display",
+        "type_badge",
+        "status_badge",
         "is_processed",
         "reviewed_at",
         "updated_at",
@@ -33,7 +34,6 @@ class TransactionAdmin(admin.ModelAdmin):
         "wallet",
         "amount",
         "type",
-        # "description",
         "status",
         "is_processed",
         "reviewed_at",
@@ -42,7 +42,6 @@ class TransactionAdmin(admin.ModelAdmin):
     )
 
     ordering = ("-created_at",)
-
     list_per_page = 25
 
     def has_add_permission(self, request):
@@ -53,6 +52,69 @@ class TransactionAdmin(admin.ModelAdmin):
 
     def has_delete_permission(self, request, obj=None):
         return DEV
+
+    # ---------------------------------------------------
+    # AMOUNT
+    # ---------------------------------------------------
+
+    @admin.display(description="Amount", ordering="amount")
+    def amount_display(self, obj):
+        amount = f"{obj.amount:,.0f}"
+
+        return format_html(
+            "<span>{}</span>",
+            amount,
+        )
+
+    # ---------------------------------------------------
+    # TYPE BADGE
+    # ---------------------------------------------------
+
+    @admin.display(description="Type", ordering="type")
+    def type_badge(self, obj):
+        colors = {
+            TransactionType.DEPOSIT: ("#ECFDF5", "#065F46"),
+            TransactionType.PURCHASE: ("#FFF1F2", "#9F1239"),
+            TransactionType.REFUND_TO_WALLET: ("#EFF6FF", "#1D4ED8"),
+            TransactionType.REFUND_TO_USER: ("#F5F3FF", "#6D28D9"),
+            TransactionType.WITHDRAW: ("#FFFBEB", "#92400E"),
+            TransactionType.ADJUSTMENT: ("#F3F4F6", "#374151"),
+        }
+
+        bg, fg = colors.get(obj.type, ("#F3F4F6", "#374151"))
+
+        return format_html(
+            '<span style="background:{};color:{};padding:3px 10px;border-radius:999px;font-size:11px;font-weight:600;display:inline-block;">{}</span>',
+            bg,
+            fg,
+            obj.get_type_display(),
+        )
+
+    # ---------------------------------------------------
+    # STATUS BADGE
+    # ---------------------------------------------------
+
+    @admin.display(description="Status", ordering="status")
+    def status_badge(self, obj):
+        colors = {
+            TransactionStatus.PENDING: ("#FFFBEB", "#92400E"),
+            TransactionStatus.APPROVED: ("#ECFDF5", "#065F46"),
+            TransactionStatus.REJECTED: ("#FEF2F2", "#991B1B"),
+            TransactionStatus.CANCELLED: ("#F3F4F6", "#374151"),
+        }
+
+        bg, fg = colors.get(obj.status, ("#F3F4F6", "#374151"))
+
+        return format_html(
+            '<span style="background:{};color:{};padding:3px 10px;border-radius:999px;font-size:11px;font-weight:600;display:inline-block;">{}</span>',
+            bg,
+            fg,
+            obj.get_status_display(),
+        )
+
+    # ---------------------------------------------------
+    # ACTIONS
+    # ---------------------------------------------------
 
     actions = [
         "approve_transactions",

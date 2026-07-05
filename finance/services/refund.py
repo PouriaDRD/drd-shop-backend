@@ -1,4 +1,5 @@
 import logging
+from typing import Optional
 from django.db import transaction
 from rest_framework.exceptions import ValidationError
 
@@ -6,13 +7,13 @@ from finance.enums import (
     TransactionType,
     TransactionStatus,
 )
+from finance.repositories import WalletRepository
+from finance.models import TransactionModel, WalletModel, RefundToWalletRequestModel
 
-from finance.repositories import (
-    WalletRepository,
-    TransactionRepository,
-    LedgerRepository,
-    RefundRepository,
-)
+from .ledger import LedgerService
+from .transaction import TransactionService
+
+from finance.repositories import RefundRepository
 
 logger = logging.getLogger("finance.refund_service")
 
@@ -25,44 +26,61 @@ class RefundService:
     # --------------------------------------------------------
     # REFUND TO WALLET
     # --------------------------------------------------------
+
     @staticmethod
     @transaction.atomic
-    def approve_wallet_refund(refund_id: str):
+    def create_wallet_refund(
+        wallet: WalletModel,
+        amount: int,
+        reason: str = "",
+        **kwargs,
+    ) -> RefundToWalletRequestModel:
+        return RefundRepository.create_wallet_refund(
+            wallet=wallet,
+            amount=amount,
+            reason=reason,
+            **kwargs,
+        )
+
+    @staticmethod
+    @transaction.atomic
+    def approve_wallet_refund(
+        refund_id: str, perv_tx: Optional[TransactionModel] = None
+    ):
 
         refund = RefundRepository.lock_wallet_refund(refund_id)
 
         if refund.is_processed:
-            raise ValidationError("Already processed.")
+            raise ValidationError("Wallet refund has already been processed.")
 
         wallet = WalletRepository.lock(refund.wallet.id)
+        amount = refund.amount
 
-        balance_before = wallet.balance
-        balance_after = balance_before + refund.amount
+        if perv_tx:
+            TransactionService.reject(str(perv_tx.id))
 
-        transaction_obj = TransactionRepository.create(
+        transaction_obj = TransactionService.create(
             wallet=wallet,
-            amount=refund.amount,
+            amount=amount,
             transaction_type=TransactionType.REFUND_TO_WALLET,
-            status=TransactionStatus.APPROVED,
+            status=TransactionStatus.PENDING,
             description=refund.reason or "تراکنش استرداد",
         )
-        TransactionRepository.approve(transaction_obj)
 
-        LedgerRepository.create(
+        tx = TransactionService.approve(str(transaction_obj.id))
+
+        LedgerService.create(
             wallet=wallet,
             transaction=transaction_obj,
             transaction_type=TransactionType.REFUND_TO_WALLET,
-            amount=refund.amount,
-            balance_before=balance_before,
-            balance_after=balance_after,
+            amount=amount,
         )
 
-        refund.transaction = transaction_obj
-        refund.save(update_fields=["transaction"])
+        RefundRepository.approve_wallet_refund(refund, tx)
 
-        RefundRepository.mark_wallet_refund_approved(refund)
-
-        logger.info(f"Wallet refund approved | id={refund_id}")
+        logger.info(
+            f"Wallet refund approved: id={str(refund_id)}, user={str(refund.wallet.user)}, amount={amount}"
+        )
 
         return refund
 
@@ -73,11 +91,13 @@ class RefundService:
         refund = RefundRepository.lock_wallet_refund(refund_id)
 
         if refund.is_processed:
-            raise ValidationError("Already processed.")
+            raise ValidationError("Wallet refund has already been processed.")
 
-        RefundRepository.mark_wallet_refund_rejected(refund, note)
+        RefundRepository.reject_wallet_refund(refund, note)
 
-        logger.info(f"Wallet refund rejected | id={refund_id}")
+        logger.info(
+            f"Wallet refund rejected: id={str(refund_id)}, user={str(refund.wallet.user)}"
+        )
 
         return refund
 
@@ -91,41 +111,36 @@ class RefundService:
         refund = RefundRepository.lock_user_refund(refund_id)
 
         if refund.is_processed:
-            raise ValidationError("Already processed.")
+            raise ValidationError("User refund has already been processed.")
 
         wallet = WalletRepository.lock(refund.wallet.id)
+        amount = refund.amount
 
-        if wallet.balance < refund.amount:
+        if wallet.balance < amount:
             raise ValidationError("Insufficient balance.")
 
-        balance_before = wallet.balance
-        balance_after = balance_before - refund.amount
-
-        transaction_obj = TransactionRepository.create(
+        transaction_obj = TransactionService.create(
             wallet=wallet,
-            amount=refund.amount,
+            amount=amount,
             transaction_type=TransactionType.REFUND_TO_USER,
-            status=TransactionStatus.APPROVED,
+            status=TransactionStatus.PENDING,
             description=refund.reason or "تراکنش استرداد",
         )
 
-        TransactionRepository.approve(transaction_obj)
+        tx = TransactionService.approve(str(transaction_obj.id))
 
-        LedgerRepository.create(
+        LedgerService.create(
             wallet=wallet,
             transaction=transaction_obj,
             transaction_type=TransactionType.REFUND_TO_USER,
-            amount=-refund.amount,
-            balance_before=balance_before,
-            balance_after=balance_after,
+            amount=-amount,
         )
 
-        refund.transaction = transaction_obj
-        refund.save(update_fields=["transaction"])
+        RefundRepository.approve_user_refund(refund, tx)
 
-        RefundRepository.mark_user_refund_approved(refund)
-
-        logger.info(f"User refund approved | id={refund_id}")
+        logger.info(
+            f"User refund approved: id={str(refund_id)}, user:{str(refund.wallet.user)}, amount={amount}"
+        )
 
         return refund
 
@@ -136,10 +151,12 @@ class RefundService:
         refund = RefundRepository.lock_user_refund(refund_id)
 
         if refund.is_processed:
-            raise ValidationError("Already processed.")
+            raise ValidationError("User refund has already been processed.")
 
-        RefundRepository.mark_user_refund_rejected(refund, note)
+        RefundRepository.reject_user_refund(refund, note)
 
-        logger.info(f"User refund rejected | id={refund_id}")
+        logger.info(
+            f"User refund rejected: id={str(refund_id)}, user:{str(refund.wallet.user)}"
+        )
 
         return refund

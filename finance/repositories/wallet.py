@@ -63,7 +63,7 @@ class WalletRepository:
     @transaction.atomic
     def lock(wallet_id) -> WalletModel:
         """
-        Lock wallet row.
+        Lock wallet row. to prevent race conditions.
 
         Notes:
             Must be called inside an atomic transaction.
