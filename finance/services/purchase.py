@@ -3,7 +3,7 @@ import logging
 from django.db import transaction
 from rest_framework.exceptions import ValidationError
 
-from shop.services.order import OrderService
+from billing.services.order import OrderService
 from finance.models import PurchaseRequestModel
 from finance.enums import TransactionType, TransactionStatus
 from finance.repositories import PurchaseRepository, WalletRepository

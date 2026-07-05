@@ -31,9 +31,10 @@ INSTALLED_APPS = [
     # Custom apps
     "accounts",
     "authentication",
+    "billing",
+    "commerce",
     "notifications",
     "finance",
-    "shop",
 ]
 
 # ---------------------------------------------------------------

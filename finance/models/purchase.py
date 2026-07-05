@@ -2,7 +2,6 @@ import uuid
 from django.db import models
 
 from .wallet import WalletModel
-from shop.models import OrderModel
 from finance.enums import PurchaseStatus
 from .transaction import TransactionModel
 
@@ -38,7 +37,7 @@ class PurchaseRequestModel(models.Model):
     )
 
     order = models.ForeignKey(
-        OrderModel,
+        "billing.OrderModel",
         on_delete=models.PROTECT,
         related_name="purchase_requests",
     )
