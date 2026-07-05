@@ -2,6 +2,8 @@ from django.contrib import admin
 
 from shop.models import CartItemModel
 
+DEV = False
+
 
 @admin.register(CartItemModel)
 class CartItemAdmin(admin.ModelAdmin):
@@ -38,3 +40,12 @@ class CartItemAdmin(admin.ModelAdmin):
         "created_at",
         "updated_at",
     )
+
+    def has_add_permission(self, request):
+        return DEV
+
+    def has_change_permission(self, request, obj=None):
+        return DEV
+
+    def has_delete_permission(self, request, obj=None):
+        return DEV

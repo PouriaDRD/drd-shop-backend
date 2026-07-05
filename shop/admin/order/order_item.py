@@ -2,6 +2,8 @@ from django.contrib import admin
 
 from shop.models import OrderItemModel
 
+DEV = False
+
 
 class OrderItemInline(admin.TabularInline):
     model = OrderItemModel
@@ -51,3 +53,12 @@ class OrderItemAdmin(admin.ModelAdmin):
         "created_at",
         "updated_at",
     )
+
+    def has_add_permission(self, request):
+        return DEV
+
+    def has_change_permission(self, request, obj=None):
+        return DEV
+
+    def has_delete_permission(self, request, obj=None):
+        return DEV
