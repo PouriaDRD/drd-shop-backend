@@ -1,6 +1,7 @@
 from django.db import transaction
-from accounts.models import UserModel
+from django.db.models import QuerySet
 
+from accounts.models import UserModel
 from shop.enums import OrderStatus
 from shop.models import OrderModel
 
@@ -34,6 +35,17 @@ class OrderRepository:
             )
             .filter(user=user)
             .first()
+        )
+
+    @staticmethod
+    def get_user_orders(user: UserModel) -> QuerySet[OrderModel]:
+        return (
+            OrderModel.objects.filter(user=user)
+            .prefetch_related(
+                "items__product",
+                "items__plan__features__feature",
+            )
+            .order_by("-created_at")
         )
 
     @staticmethod

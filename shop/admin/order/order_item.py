@@ -34,6 +34,7 @@ class OrderItemAdmin(admin.ModelAdmin):
     )
 
     search_fields = (
+        "order__user__email",
         "order__id",
         "product__title",
         "plan__title",

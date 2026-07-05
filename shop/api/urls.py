@@ -8,12 +8,22 @@ from shop.api.views.cart import (
     DeleteCartItemAPIView,
     CheckoutCreateAPIView,
 )
+
+from shop.api.views.order import OrderListAPIView
+
 from shop.api.views.coupon import (
     ApplyCouponAPIView,
     RemoveCouponAPIView,
 )
 
+from shop.api.views.vpn_service import VPNServiceListAPIView
+
 urlpatterns = [
+    # Orders
+    path("my-orders/", OrderListAPIView.as_view(), name="order-list"),
+    # VPN Services
+    path("my-vpn-services/", VPNServiceListAPIView.as_view(), name="vpn-service-list"),
+    # Products
     path("products/", ProductListAPIView.as_view(), name="product-list"),
     path(
         "products/<uuid:product_id>/",

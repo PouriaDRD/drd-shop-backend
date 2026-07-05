@@ -20,16 +20,6 @@ class OrderItemSerializer(serializers.ModelSerializer):
         read_only=True,
     )
 
-    product_slug = serializers.CharField(
-        source="product.slug",
-        read_only=True,
-    )
-
-    product_type = serializers.CharField(
-        source="product.type",
-        read_only=True,
-    )
-
     plan = ProductPlanSerializer(
         read_only=True,
     )
@@ -40,9 +30,9 @@ class OrderItemSerializer(serializers.ModelSerializer):
             "id",
             "product_id",
             "product_title",
-            "product_slug",
-            "product_type",
             "plan",
             "quantity",
             "price",
         )
+
+        read_only_fields = ["__all__"]

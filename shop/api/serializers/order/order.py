@@ -24,3 +24,4 @@ class OrderSerializer(serializers.ModelSerializer):
             "items",
             "created_at",
         )
+        read_only_fields = ["__all__"]
