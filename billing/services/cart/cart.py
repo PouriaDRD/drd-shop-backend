@@ -1,6 +1,6 @@
 from django.db import transaction
-
 from accounts.models import UserModel
+from rest_framework.exceptions import ValidationError
 
 from commerce.services.coupon import CouponService
 from commerce.models import ProductModel, ProductPlanModel
@@ -26,13 +26,13 @@ class CartService:
         cart = CartService.get_or_create_cart(user)
 
         if not product.is_active:
-            raise Exception("Product is not active.")
+            raise ValidationError("محصول غیر فعال است.")
 
         if not plan.is_active:
-            raise Exception("Plan is not active.")
+            raise ValidationError("پلن غیر فعال است.")
 
         if not plan.is_available:
-            raise Exception("Plan is not available.")
+            raise ValidationError("پلن موجود نیست.")
 
         item, created = cart.items.get_or_create(  # type: ignore
             product=product,

@@ -10,6 +10,16 @@ class V2rayVPNSerializer(serializers.ModelSerializer):
         read_only=True,
     )
 
+    product_id = serializers.UUIDField(
+        source="order_item.product.id",
+        read_only=True,
+    )
+
+    plan_id = serializers.UUIDField(
+        source="order_item.plan.id",
+        read_only=True,
+    )
+
     plan_title = serializers.CharField(
         source="order_item.plan.title",
         read_only=True,
@@ -21,7 +31,9 @@ class V2rayVPNSerializer(serializers.ModelSerializer):
         model = V2rayVPNModel
         fields = (
             "id",
+            "product_id",
             "product_title",
+            "plan_id",
             "plan_title",
             "subscription_link",
             "content",
