@@ -7,7 +7,7 @@ from django.core.cache import cache
 
 class V2raySubscriptionParser:
     timeout = 5
-    cache_ttl = 60 * 1  # 1 minutes
+    cache_ttl = 60 * 2  # 1 minutes
 
     @classmethod
     def fetch(cls, url: str) -> dict:
