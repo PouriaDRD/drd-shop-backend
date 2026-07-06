@@ -104,14 +104,14 @@ class NotificationMarkAllAsReadAPIView(APIView):
     Mark all notifications as read.
     """
 
-    http_method_names = ["patch"]
+    http_method_names = ["post"]
 
     permission_classes = [IsAuthenticated]
 
     throttle_scope = "user"
     throttle_classes = [ScopedRateThrottle]
 
-    def patch(self, request: Request, *args, **kwargs):
+    def post(self, request: Request, *args, **kwargs):
         try:
             user = request.user
 
