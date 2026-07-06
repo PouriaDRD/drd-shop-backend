@@ -18,8 +18,23 @@ class V2rayVPNModel(models.Model):
         on_delete=models.CASCADE,
     )
 
-    subscription_link = models.URLField()
-    content = models.TextField()
+    content = models.TextField(
+        verbose_name="Content (v2ray config)",
+        blank=True,
+        null=True,
+    )
+
+    subscription_link = models.URLField(
+        verbose_name="Subscription Link",
+        blank=True,
+        null=True,
+    )
+
+    subscription_json_link = models.URLField(
+        verbose_name="Subscription JSON Link",
+        blank=True,
+        null=True,
+    )
 
     expires_at = models.DateTimeField()
     updated_at = models.DateTimeField(auto_now=True)
