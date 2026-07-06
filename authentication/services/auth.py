@@ -6,6 +6,8 @@ from .otp import OTPService
 from .token import TokenService
 
 from notifications.tasks import send_email_task
+from notifications.enums import NotificationType
+from notifications.services import NotificationService
 
 from authentication.enums import OTPType
 from accounts.services import UserService
@@ -22,7 +24,6 @@ class AuthService:
 
     @classmethod
     def register(cls, email: str, password: str, request: Request):
-
         user = UserService.create_user(
             email=email,
             password=password,
@@ -33,6 +34,14 @@ class AuthService:
             str(user),
             email,
         )
+
+        NotificationService.create(
+            user=user,
+            title="ثبت نام موفق بود!",
+            message="حساب شما با موفقیت ثبت نام شد. از اینکه مارو انتخاب کردین ممنونیم!",
+            notification_type=NotificationType.INFO,
+        )
+
         return {
             "user": str(user),
             **TokenService.generate(user),
@@ -54,6 +63,13 @@ class AuthService:
                 name=str(user),
                 email=user.email,
             )
+
+        NotificationService.create(
+            user=user,  # type: ignore
+            title="ورود موفق بود!",
+            message="شما با موفقیت وارد حساب خود شدید!",
+            notification_type=NotificationType.INFO,
+        )
 
         return {
             "user": str(user),
@@ -102,6 +118,13 @@ class AuthService:
             request,
             name=str(user),
             email=user.email,
+        )
+
+        NotificationService.create(
+            user=user,  # type: ignore
+            title="ورود موفق بود!",
+            message="شما با موفقیت وارد حساب خود شدید!",
+            notification_type=NotificationType.INFO,
         )
 
         return {

@@ -6,7 +6,6 @@ from config.settings.app_config import config
 from authentication.selectors import OTPSelector
 from authentication.repositories import OTPRepository
 
-# from django.core.mail import send_mail
 from notifications.tasks import send_email_task
 
 
@@ -50,16 +49,7 @@ class OTPService:
         )
 
         # 5. Send OTP to user
-        # send_mail(
-        #     "test",
-        #     "hello",
-        #     "31j.mac.t3@gmail.com",
-        #     ["pouriadrd@gmail.com"],
-        #     fail_silently=False,
-        # )
         cls.send_otp_to_email(email, otp_code)
-        # TODO: Send it with email service
-        # cls._print_to_terminal(email, otp_code)
 
         return otp_instance
 
