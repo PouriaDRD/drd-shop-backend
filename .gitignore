@@ -31,7 +31,7 @@ __pycache__/
 
 # C extensions
 *.so
-
+dev_db.sqlite3-journal
 # Distribution / packaging
 .Python
 env/

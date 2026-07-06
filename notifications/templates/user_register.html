@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ثبت نام موفق</title>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #f6f7fb;
+            font-family: ui-sans-serif, system-ui, -apple-system;
+            color: #111827;
+            direction: rtl;
+            text-align: right;
+        }
+
+        .wrapper {
+            padding: 40px 16px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .card {
+            width: 100%;
+            max-width: 520px;
+            background: #ffffff;
+            border-radius: 14px;
+            border: 1px solid #e5e7eb;
+            overflow: hidden;
+        }
+
+        .header {
+            padding: 20px;
+            background: #1447e6;
+            color: white;
+            text-align: center;
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .content {
+            padding: 24px;
+        }
+
+        .title {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .text {
+            font-size: 13px;
+            color: #6b7280;
+            line-height: 1.8;
+            margin-bottom: 20px;
+        }
+
+        .info-box {
+            margin: 20px 0;
+            padding: 16px;
+            border-radius: 12px;
+            background: #f3f4f6;
+            border: 1px solid #e5e7eb;
+        }
+
+        .row {
+            font-size: 13px;
+            margin-bottom: 8px;
+            color: #374151;
+        }
+
+        .row span {
+            font-weight: 600;
+            color: #111827;
+        }
+
+        .success {
+            margin-top: 18px;
+            padding: 12px;
+            background: #ecfdf5;
+            border: 1px solid #a7f3d0;
+            border-radius: 10px;
+            font-size: 12px;
+            color: #065f46;
+            line-height: 1.7;
+        }
+
+        .alert {
+            margin-top: 18px;
+            padding: 12px;
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 10px;
+            font-size: 12px;
+            color: #1d4ed8;
+            line-height: 1.7;
+        }
+
+        .footer {
+            padding: 16px;
+            text-align: center;
+            font-size: 11px;
+            color: #9ca3af;
+            border-top: 1px solid #eee;
+            background: #fafafa;
+        }
+
+        .brand {
+            color: #1447e6;
+            font-weight: 600;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrapper">
+        <div class="card">
+
+            <!-- Header -->
+            <div class="header">
+                ثبت نام با موفقیت انجام شد
+            </div>
+
+            <!-- Content -->
+            <div class="content">
+
+                <div class="title">
+                    سلام {{ name }} 👋
+                </div>
+
+                <div class="text">
+                    حساب کاربری شما با موفقیت در {{ site_name }} ایجاد شد.
+                    از این پس می‌توانید از تمامی امکانات سایت استفاده کنید.
+                </div>
+
+                <!-- Account Information -->
+                <div class="info-box">
+
+                    <div class="row">
+                        ایمیل: <span>{{ email }}</span>
+                    </div>
+
+                    <div class="row">
+                        دستگاه: <span>{{ device }}</span>
+                    </div>
+
+                    <div class="row">
+                        مرورگر: <span>{{ browser }}</span>
+                    </div>
+
+                    <div class="row">
+                        آی پی: <span>{{ ip_address }}</span>
+                    </div>
+
+                    <!-- <div class="row">
+                        موقعیت تقریبی: <span>{{ location }}</span>
+                    </div> -->
+
+                </div>
+
+                <!-- Success -->
+                <div class="success">
+                    حساب کاربری شما با موفقیت ایجاد شد و اکنون آماده استفاده است.
+                </div>
+
+                <!-- Info -->
+                <div class="alert">
+                    اگر این ثبت نام توسط شما انجام نشده است، لطفاً در اسرع وقت با پشتیبانی تماس بگیرید.
+                </div>
+
+            </div>
+
+            <!-- Footer -->
+            <div class="footer">
+                این پیام به صورت خودکار از طرف
+                <span class="brand">{{ site_name }}</span>
+                ارسال شده است.
+            </div>
+
+        </div>
+    </div>
+</body>
+
+</html>

@@ -34,6 +34,7 @@ class LoginSerializer(serializers.Serializer):
             result = AuthService.login(
                 email=attrs["email"],
                 password=attrs["password"],
+                request=self.context.get("request"),  # type: ignore
             )
         except:
             raise serializers.ValidationError(

@@ -49,6 +49,7 @@ class EmailConfig:
     host: str
     port: int
     use_tls: bool
+    use_ssl: bool
     host_user: str
     host_password: str
     default_from_email: str
@@ -108,6 +109,7 @@ class Config:
             host=self._get_required("EMAIL_HOST"),
             port=self._get_int("EMAIL_PORT"),
             use_tls=self._get_bool("EMAIL_USE_TLS"),
+            use_ssl=self._get_bool("EMAIL_USE_SSL"),
             host_user=self._get_required("EMAIL_HOST_USER"),
             host_password=self._get_required("EMAIL_HOST_PASSWORD"),
             default_from_email=self._get_required("DEFAULT_FROM_EMAIL"),

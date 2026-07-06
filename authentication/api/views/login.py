@@ -1,4 +1,5 @@
 import logging
+
 from rest_framework import status
 from rest_framework.request import Request
 from rest_framework.permissions import AllowAny
@@ -28,7 +29,10 @@ class LoginAPIView(GenericAPIView):
     def post(self, request: Request, *args, **kwargs):
 
         try:
-            serializer = self.get_serializer(data=request.data)
+            serializer = self.get_serializer(
+                data=request.data,
+                context={"request": request},
+            )
             serializer.is_valid(raise_exception=True)
 
             result = serializer.save()
@@ -40,16 +44,15 @@ class LoginAPIView(GenericAPIView):
                 status_code=status.HTTP_200_OK,
             )
 
-        except ValidationError as e:
-            logger.warning(f"Error registering user: {e.get_codes()}")
+        except ValidationError:
             return APIResponse.error(
-                message=f"نام کاربری یا رمز عبور اشتباه است.",
+                message="نام کاربری یا رمز عبور اشتباه است.",
                 status_code=status.HTTP_400_BAD_REQUEST,
             )
 
         except Exception as e:
             logger.error(f"Error logging in user: {e}")
             return APIResponse.error(
-                message=f"نام کاربری یا رمز عبور اشتباه است.",
+                message="نام کاربری یا رمز عبور اشتباه است.",
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )

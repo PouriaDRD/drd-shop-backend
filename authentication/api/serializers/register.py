@@ -50,7 +50,14 @@ class RegisterSerializer(serializers.Serializer):
         return attrs
 
     def create(self, validated_data):
+        email = validated_data["email"]
+        password = validated_data["password"]
+        request = self.context.get("request")
 
-        result = AuthService.register(**validated_data)
+        result = AuthService.register(
+            email=email,
+            password=password,
+            request=request,  # type: ignore
+        )
 
         return result

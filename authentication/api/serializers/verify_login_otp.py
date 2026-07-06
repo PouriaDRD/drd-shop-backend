@@ -22,7 +22,12 @@ class VerifyLoginOTPSerializer(serializers.Serializer):
         otp_type = attrs["otp_type"]
 
         try:
-            result = AuthService.verify_login_otp(email, code, otp_type)
+            result = AuthService.verify_login_otp(
+                email,
+                code,
+                request=self.context.get("request"),  # type: ignore
+                otp_type=otp_type,
+            )
         except InvalidOTPError:
             raise serializers.ValidationError(
                 {"code": "کد وارد شده اشتباه یا منقضی شده است"}

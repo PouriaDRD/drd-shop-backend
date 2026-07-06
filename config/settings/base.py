@@ -133,6 +133,7 @@ EMAIL_BACKEND = config.email.backend
 EMAIL_HOST = config.email.host
 EMAIL_PORT = config.email.port
 EMAIL_USE_TLS = config.email.use_tls
+EMAIL_USE_SSL = config.email.use_ssl
 EMAIL_HOST_USER = config.email.host_user
 EMAIL_HOST_PASSWORD = config.email.host_password
 DEFAULT_FROM_EMAIL = config.email.default_from_email

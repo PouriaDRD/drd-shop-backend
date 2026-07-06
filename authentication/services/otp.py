@@ -6,6 +6,9 @@ from config.settings.app_config import config
 from authentication.selectors import OTPSelector
 from authentication.repositories import OTPRepository
 
+# from django.core.mail import send_mail
+from notifications.tasks import send_email_task
+
 
 class OTPService:
     """
@@ -46,8 +49,17 @@ class OTPService:
             code_hash=otp_hash,
         )
 
+        # 5. Send OTP to user
+        # send_mail(
+        #     "test",
+        #     "hello",
+        #     "31j.mac.t3@gmail.com",
+        #     ["pouriadrd@gmail.com"],
+        #     fail_silently=False,
+        # )
+        cls.send_otp_to_email(email, otp_code)
         # TODO: Send it with email service
-        cls._send_otp(email, otp_code)
+        # cls._print_to_terminal(email, otp_code)
 
         return otp_instance
 
@@ -77,8 +89,27 @@ class OTPService:
         return False
 
     @classmethod
-    def _send_otp(cls, email: str, code: str):
+    def _print_to_terminal(cls, email: str, code: str):
         print(f"[OTP] {email} => {code}")
+
+    @classmethod
+    def send_otp_to_email(cls, email: str, code: str):
+        """
+        Sends an OTP to the user via email.
+        """
+
+        send_email_task.delay(
+            template_slug="otp-template",
+            recipient_email=email,
+            recipient_name=email,
+            context={
+                "name": email,
+                "otp_code": code,
+                "expiry_minutes": cls.OTP_TTL_MINUTES,
+                "site_name": "DRD Shop",
+                "support_email": "31j.mac.t3@gmail.com",
+            },
+        )  # type: ignore
 
     @classmethod
     def _generate_otp_code(cls) -> str:
