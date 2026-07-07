@@ -24,7 +24,7 @@ class TicketMessageSerializer(serializers.ModelSerializer):
             "id",
             "sender",
             "message",
-            "is_staff",
+            "is_staff_reply",
             "attachments",
             "created_at",
         )

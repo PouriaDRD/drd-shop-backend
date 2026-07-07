@@ -8,6 +8,7 @@ from support.models import (
 )
 
 from support.enums import TicketStatus
+from support.services import TicketService
 
 # ==================================================
 # Attachment Inline
@@ -35,16 +36,10 @@ class TicketMessageInline(admin.TabularInline):
 
     extra = 0
 
-    readonly_fields = (
-        "sender",
-        "message",
-        "created_at",
-    )
-
     fields = (
         "sender",
         "message",
-        "created_at",
+        "is_staff_reply",
     )
 
 
@@ -123,7 +118,6 @@ class TicketAdmin(admin.ModelAdmin):
 
         updated = queryset.update(
             status=TicketStatus.OPEN,
-            closed_at=None,
         )
 
         self.message_user(
@@ -162,6 +156,8 @@ class TicketMessageAdmin(admin.ModelAdmin):
         TicketAttachmentInline,
     ]
 
+    ordering = ("-created_at",)
+
     def short_message(self, obj):
 
         if len(obj.message) > 50:
@@ -170,6 +166,33 @@ class TicketMessageAdmin(admin.ModelAdmin):
         return obj.message
 
     short_message.short_description = "Message"  # type: ignore
+
+    actions = [
+        "reply",
+    ]
+
+    # -----------------------------------------
+    # Reply View
+    # -----------------------------------------
+
+    @admin.action(description="Reply to selected messages")
+    def reply(
+        self,
+        request,
+        queryset,
+    ):
+        updated = 0
+
+        for msg in queryset:
+            TicketService.staff_reply(
+                message_id=msg.id,
+            )
+            updated += 1
+
+        self.message_user(
+            request,
+            f"{updated} tickets replied successfully.",
+        )
 
 
 # ==================================================

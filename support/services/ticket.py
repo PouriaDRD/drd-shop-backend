@@ -11,6 +11,7 @@ from support.repositories import (
 from support.enums import (
     TicketStatus,
     TicketPriority,
+    TicketCategory,
 )
 
 
@@ -24,16 +25,18 @@ class TicketService:
     def create_ticket(
         *,
         user,
-        subject,
+        title,
         message,
         attachments=None,
-        priority=None,
+        category=TicketCategory.GENERAL,
+        priority=TicketPriority.MEDIUM,
     ):
 
         ticket = TicketRepository.create(
             user=user,
-            subject=subject,
+            title=title,
             priority=priority,
+            category=category,
             status=TicketStatus.OPEN,
         )
 
@@ -41,7 +44,7 @@ class TicketService:
             ticket=ticket,
             sender=user,
             message=message,
-            is_staff=False,
+            is_staff_reply=False,
         )
 
         if attachments:
@@ -105,7 +108,7 @@ class TicketService:
             ticket=ticket,
             sender=user,
             message=message,
-            is_staff=False,
+            is_staff_reply=False,
         )
 
         if attachments:
@@ -116,6 +119,11 @@ class TicketService:
                     message=ticket_message,
                     file=file,
                 )
+
+        TicketRepository.update_status(
+            ticket,
+            status=TicketStatus.OPEN,
+        )
 
         return ticket_message
 
@@ -137,3 +145,28 @@ class TicketService:
         return TicketRepository.close(
             ticket,
         )
+
+    @staticmethod
+    @transaction.atomic
+    def staff_reply(
+        *,
+        message_id,
+    ):
+        message = TicketMessageRepository.get_message_by_id(message_id)
+
+        if not message:
+            raise ValueError("Message not found")
+
+        ticket = TicketRepository.lock(
+            message.ticket.id,
+        )
+
+        if ticket.status == TicketStatus.CLOSED:
+            raise ValueError("Ticket closed")
+
+        TicketRepository.update_status(
+            ticket,
+            status=TicketStatus.ANSWERED,
+        )
+
+        return

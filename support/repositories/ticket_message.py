@@ -38,3 +38,11 @@ class TicketMessageRepository:
                 "created_at",
             )
         )
+
+    @staticmethod
+    def get_message_by_id(
+        message_id,
+    ):
+        return TicketMessageModel.objects.filter(
+            id=message_id,
+        ).first()

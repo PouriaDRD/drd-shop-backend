@@ -4,16 +4,20 @@ from support.models import TicketModel
 
 from .ticket_message import TicketMessageSerializer
 
-from support.services.ticket import TicketService
+from support.enums import TicketCategory
+from support.services import TicketService
 
 
 class TicketCreateSerializer(serializers.Serializer):
 
-    subject = serializers.CharField()
+    title = serializers.CharField()
 
     message = serializers.CharField()
 
-    priority = serializers.CharField(required=False)
+    category = serializers.ChoiceField(
+        choices=TicketCategory.choices,
+        default=TicketCategory.GENERAL,
+    )
 
     attachments = serializers.ListField(
         child=serializers.FileField(),
@@ -37,7 +41,7 @@ class TicketListSerializer(serializers.ModelSerializer):
 
         fields = (
             "id",
-            "subject",
+            "title",
             "status",
             "updated_at",
             "created_at",
@@ -56,7 +60,7 @@ class TicketDetailSerializer(serializers.ModelSerializer):
 
         fields = (
             "id",
-            "subject",
+            "title",
             "status",
             "messages",
             "updated_at",
@@ -84,6 +88,5 @@ class TicketReplySerializer(serializers.Serializer):
         return TicketService.reply(
             ticket_id=ticket_id,
             user=request.user,
-            message=validated_data["message"],
             **validated_data,
         )

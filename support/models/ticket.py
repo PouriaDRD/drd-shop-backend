@@ -75,4 +75,4 @@ class TicketModel(models.Model):
 
     def __str__(self):
 
-        return str(self.title)
+        return f"{str(self.title)} | {self.user}"
