@@ -1,7 +1,11 @@
 from django.db import transaction
 from django.core.exceptions import PermissionDenied
 
-from support.repositories import TicketRepository, TicketMessageRepository
+from support.repositories import (
+    TicketRepository,
+    TicketMessageRepository,
+    TicketAttachmentRepository,
+)
 
 
 from support.enums import (
@@ -20,9 +24,10 @@ class TicketService:
     def create_ticket(
         *,
         user,
-        subject: str,
-        message: str,
-        priority: str = TicketPriority.MEDIUM,
+        subject,
+        message,
+        attachments=None,
+        priority=None,
     ):
 
         ticket = TicketRepository.create(
@@ -32,12 +37,21 @@ class TicketService:
             status=TicketStatus.OPEN,
         )
 
-        TicketMessageRepository.create(
+        ticket_message = TicketMessageRepository.create(
             ticket=ticket,
             sender=user,
             message=message,
             is_staff=False,
         )
+
+        if attachments:
+
+            for file in attachments:
+
+                TicketAttachmentRepository.create(
+                    message=ticket_message,
+                    file=file,
+                )
 
         return ticket
 
@@ -76,24 +90,34 @@ class TicketService:
         ticket_id,
         user,
         message,
+        attachments=None,
     ):
 
-        ticket = TicketRepository.lock(
-            ticket_id,
-        )
+        ticket = TicketRepository.lock(ticket_id)
 
         if ticket.user.id != user.id:
-            raise PermissionDenied("Invalid ticket owner.")
+            raise PermissionDenied()
 
         if ticket.status == TicketStatus.CLOSED:
-            raise ValueError("Ticket is closed.")
+            raise ValueError("Ticket closed")
 
-        return TicketMessageRepository.create(
+        ticket_message = TicketMessageRepository.create(
             ticket=ticket,
             sender=user,
             message=message,
             is_staff=False,
         )
+
+        if attachments:
+
+            for file in attachments:
+
+                TicketAttachmentRepository.create(
+                    message=ticket_message,
+                    file=file,
+                )
+
+        return ticket_message
 
     @staticmethod
     @transaction.atomic

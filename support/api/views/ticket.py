@@ -10,12 +10,13 @@ from rest_framework.views import APIView
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.throttling import ScopedRateThrottle
+from rest_framework.parsers import (
+    MultiPartParser,
+    FormParser,
+)
 
 from config.utils import APIResponse
-
-
 from support.services import TicketService
-
 from support.api.serializers import (
     TicketCreateSerializer,
     TicketListSerializer,
@@ -40,10 +41,18 @@ class TicketCreateAPIView(CreateAPIView):
     throttle_scope = "user"
     throttle_classes = [ScopedRateThrottle]
 
+    parser_classes = [
+        MultiPartParser,
+        FormParser,
+    ]
+
     def create(self, request: Request, *args, **kwargs):
 
         try:
-            serializer = self.get_serializer(data=request.data)
+            serializer = self.get_serializer(
+                data=request.data,
+                context={"request": request},
+            )
 
             serializer.is_valid(raise_exception=True)
 
@@ -97,7 +106,11 @@ class TicketListAPIView(ListAPIView):
         try:
             user = request.user
             queryset = self.get_queryset()
-            serializer = self.get_serializer(queryset, many=True)
+            serializer = self.get_serializer(
+                queryset,
+                many=True,
+                context={"request": request},
+            )
 
             logger.info(f"User tickets retrieved: {str(user)}")
             return APIResponse.success(
@@ -139,7 +152,10 @@ class TicketDetailAPIView(RetrieveAPIView):
     def get(self, request: Request, *args, **kwargs):
         try:
             ticket = self.get_object()
-            serializer = self.get_serializer(ticket)
+            serializer = self.get_serializer(
+                ticket,
+                context={"request": request},
+            )
 
             logger.info(f"Ticket detail retrieved: {str(ticket.id)}")
             return APIResponse.success(
@@ -166,6 +182,11 @@ class TicketReplyAPIView(APIView):
 
     throttle_scope = "user"
     throttle_classes = [ScopedRateThrottle]
+
+    parser_classes = [
+        MultiPartParser,
+        FormParser,
+    ]
 
     def post(self, request: Request, *args, **kwargs):
         try:

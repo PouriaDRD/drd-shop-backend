@@ -8,18 +8,16 @@ from support.services.ticket import TicketService
 
 
 class TicketCreateSerializer(serializers.Serializer):
-    """
-    Create ticket serializer.
-    """
 
-    subject = serializers.CharField(
-        max_length=255,
-        required=True,
-    )
+    subject = serializers.CharField()
 
-    message = serializers.CharField(
-        required=True,
-        min_length=5,
+    message = serializers.CharField()
+
+    priority = serializers.CharField(required=False)
+
+    attachments = serializers.ListField(
+        child=serializers.FileField(),
+        required=False,
     )
 
     def create(self, validated_data):
@@ -72,6 +70,11 @@ class TicketReplySerializer(serializers.Serializer):
         min_length=1,
     )
 
+    attachments = serializers.ListField(
+        child=serializers.FileField(),
+        required=False,
+    )
+
     def create(self, validated_data):
 
         request = self.context["request"]
@@ -82,4 +85,5 @@ class TicketReplySerializer(serializers.Serializer):
             ticket_id=ticket_id,
             user=request.user,
             message=validated_data["message"],
+            **validated_data,
         )
