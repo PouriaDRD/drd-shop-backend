@@ -5,6 +5,7 @@ from .transaction import TransactionListAPIView
 from .refund_to_user import RefundToUserListAPIView
 from .refund_to_wallet import RefundToWalletListAPIView
 from .deposit import DepositCreateAPIView, DepositListAPIView
+from .purchase_statistics import PurchaseStatisticsAPIView
 
 __all__ = [
     "CardListAPIView",
@@ -15,4 +16,5 @@ __all__ = [
     "TransactionListAPIView",
     "RefundToUserListAPIView",
     "RefundToWalletListAPIView",
+    "PurchaseStatisticsAPIView",
 ]

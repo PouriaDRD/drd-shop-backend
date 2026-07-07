@@ -1,6 +1,7 @@
+from datetime import timedelta
 from django.db import transaction
 from django.utils import timezone
-from django.db.models import QuerySet
+from django.db.models import QuerySet, Sum
 
 from finance.enums import PurchaseStatus
 from finance.models import PurchaseRequestModel
@@ -36,6 +37,39 @@ class PurchaseRepository:
             .filter(id=purchase_id)
             .first()
         )
+
+    @staticmethod
+    def get_total_purchase_amount(
+        wallet_id: str,
+    ) -> int:
+        """
+        Get total approved purchase amount.
+        """
+
+        result = PurchaseRequestModel.objects.filter(
+            wallet_id=wallet_id,
+            status=PurchaseStatus.APPROVED,
+        ).aggregate(total=Sum("amount"))
+
+        return result["total"] or 0
+
+    @staticmethod
+    def get_last_30_days_purchase_amount(
+        wallet_id: str,
+    ) -> int:
+        """
+        Get purchase amount in last 30 days.
+        """
+
+        start_date = timezone.now() - timedelta(days=30)
+
+        result = PurchaseRequestModel.objects.filter(
+            wallet_id=wallet_id,
+            status=PurchaseStatus.APPROVED,
+            created_at__gte=start_date,
+        ).aggregate(total=Sum("amount"))
+
+        return result["total"] or 0
 
     @staticmethod
     def get_wallet_purchases(wallet_id) -> QuerySet[PurchaseRequestModel]:

@@ -75,6 +75,20 @@ class PurchaseService:
         return purchase
 
     @staticmethod
+    def get_purchase_statistics(
+        wallet_id: str,
+    ):
+
+        return {
+            "total_purchase_amount": PurchaseRepository.get_total_purchase_amount(
+                wallet_id
+            ),
+            "last_30_days_purchase_amount": PurchaseRepository.get_last_30_days_purchase_amount(
+                wallet_id
+            ),
+        }
+
+    @staticmethod
     @transaction.atomic
     def approve(purchase_id: str) -> PurchaseRequestModel:
         """

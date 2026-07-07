@@ -5,6 +5,7 @@ from .purchase import PurchaseRetrieveSerializer
 from .refund_to_user import RefundToUserRetrieveSerializer
 from .refund_to_wallet import RefundToWalletRetrieveSerializer
 from .deposit import DepositCreateSerializer, DepositRetrieveSerializer
+from .purchase_statistics import PurchaseStatisticsSerializer
 
 __all__ = [
     "CardSerializer",
@@ -15,4 +16,5 @@ __all__ = [
     "PurchaseRetrieveSerializer",
     "RefundToUserRetrieveSerializer",
     "RefundToWalletRetrieveSerializer",
+    "PurchaseStatisticsSerializer",
 ]

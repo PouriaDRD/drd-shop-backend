@@ -9,9 +9,15 @@ from finance.api.views import (
     TransactionListAPIView,
     RefundToUserListAPIView,
     RefundToWalletListAPIView,
+    PurchaseStatisticsAPIView,
 )
 
 urlpatterns = [
+    path(
+        "purchase-statistics/",
+        PurchaseStatisticsAPIView.as_view(),
+        name="purchase-statistics",
+    ),
     path("cards/", CardListAPIView.as_view(), name="cards"),
     path("my-wallet/", WalletRetrieveAPIView.as_view(), name="my-wallet"),
     path("my-deposits/", DepositListAPIView.as_view(), name="my-deposits"),
