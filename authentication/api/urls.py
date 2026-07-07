@@ -12,7 +12,7 @@ from .views import (
 
 urlpatterns = [
     # Login history
-    path("login-history/", MyLoginHistoryAPIView.as_view(), name="login-history"),
+    path("my-login-history/", MyLoginHistoryAPIView.as_view(), name="my-login-history"),
     # Normal login
     path("login/", LoginAPIView.as_view(), name="login"),
     path("register/", RegisterAPIView.as_view(), name="register"),
