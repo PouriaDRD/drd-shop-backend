@@ -3,6 +3,9 @@ from typing import Optional
 from django.db import transaction
 from rest_framework.exceptions import ValidationError
 
+from notifications.enums import NotificationType
+from notifications.services import NotificationService
+
 from finance.enums import (
     TransactionType,
     TransactionStatus,
@@ -137,6 +140,13 @@ class RefundService:
         )
 
         RefundRepository.approve_user_refund(refund, tx)
+
+        NotificationService.create(
+            user=wallet.user,
+            title="تراکنش استرداد تایید شد",
+            message="تراکنش استرداد با موفقیت تایید شد، مبلغ آن به حساب بانکی شما برگشت داده شد!",
+            notification_type=NotificationType.INFO,
+        )
 
         logger.info(
             f"User refund approved: id={str(refund_id)}, user:{str(refund.wallet.user)}, amount={amount}"

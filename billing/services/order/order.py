@@ -10,6 +10,9 @@ from accounts.models import UserModel
 from commerce.enums import ProductType
 from commerce.models import V2rayVPNModel
 
+from notifications.enums import NotificationType
+from notifications.services import NotificationService
+
 from billing.enums import OrderStatus
 from billing.repositories.order import OrderRepository, OrderItemRepository
 from billing.models import (
@@ -73,6 +76,13 @@ class OrderService:
 
         OrderItemRepository.bulk_create(order_items)
 
+        NotificationService.create(
+            user=user,
+            title="سفارش شما دریافت شد",
+            message="بابت خریدتون ممنونیم، پس از بررسی و آماده سازی، سفارشتون قابل دریافت خواهد بود!",
+            notification_type=NotificationType.INFO,
+        )
+
         return order
 
     # =========================================================
@@ -104,10 +114,18 @@ class OrderService:
             raise Exception("Order already processed.")
 
         OrderRepository.approve(order)
+        user = order.user
 
         items = OrderItemRepository.get_by_order(order)
 
         OrderService.create_vpn_subscription(items)
+
+        NotificationService.create(
+            user=user,
+            title="سفارش شما تایید شد",
+            message="سفارش شما با موفقیت تایید شد و در بخش سرویس های من قابل دریافت و مشاهده است!",
+            notification_type=NotificationType.INFO,
+        )
 
         logger.info(
             f"Order approved: id={order.id}, user={order.user}, total_price={order.total_price}",
@@ -138,6 +156,14 @@ class OrderService:
             raise Exception("Order already processed.")
 
         OrderRepository.reject(order)
+        user = order.user
+
+        NotificationService.create(
+            user=user,
+            title="سفارش شما رد شد",
+            message="متاسفانه سفارش شما تایید نشد، مبلغ به کیف پول شما برگشت داده شد!",
+            notification_type=NotificationType.INFO,
+        )
 
         logger.info(
             f"Order rejected | id={order.id}, user={order.user}, total_price={order.total_price}",
