@@ -28,27 +28,27 @@ DATABASES = {
 # ---------------------------------------------------------------
 # Allowed Hosts & Internal IPs
 # ---------------------------------------------------------------
-INTERNAL_IPS = ["localhost", "127.0.0.1"]
-ALLOWED_HOSTS = [
-    "example.com",
-    "www.example.com",
-    "sub.example.com",
-]
+# INTERNAL_IPS = ["localhost", "127.0.0.1"]
+# ALLOWED_HOSTS = [
+#     "example.com",
+#     "www.example.com",
+#     "sub.example.com",
+# ]
 
 # ---------------------------------------------------------------
 # CORS & CSRF Configuration
 # ---------------------------------------------------------------
-CORS_ALLOW_CREDENTIALS = True
+# CORS_ALLOW_CREDENTIALS = True
 
-CORS_ALLOWED_ORIGINS = [
-    "https://example.com",
-    "https://sub.example.com",
-]
+# CORS_ALLOWED_ORIGINS = [
+#     "https://example.com",
+#     "https://sub.example.com",
+# ]
 
-CSRF_TRUSTED_ORIGINS = [
-    "https://example.com",
-    "https://api.example.com",
-]
+# CSRF_TRUSTED_ORIGINS = [
+#     "https://example.com",
+#     "https://api.example.com",
+# ]
 
 CORS_ALLOW_METHODS = [
     "DELETE",

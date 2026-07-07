@@ -20,30 +20,30 @@ MIDDLEWARE.insert(0, "debug_toolbar.middleware.DebugToolbarMiddleware")
 # ---------------------------------------------------------------
 # Allowed Hosts & Internal IPs
 # ---------------------------------------------------------------
-INTERNAL_IPS = ["localhost", "127.0.0.1"]
-ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
+# INTERNAL_IPS = ["localhost", "127.0.0.1"]
+# ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
 
 # ---------------------------------------------------------------
 # CORS & CSRF Configuration
 # ---------------------------------------------------------------
-CORS_ALLOW_CREDENTIALS = True
+# CORS_ALLOW_CREDENTIALS = True
 
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-]
+# CORS_ALLOWED_ORIGINS = [
+#     "http://localhost:3000",
+# ]
 
-CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:3000",
-]
+# CSRF_TRUSTED_ORIGINS = [
+#     "http://localhost:3000",
+# ]
 
-CORS_ALLOW_METHODS = [
-    "DELETE",
-    "GET",
-    "OPTIONS",
-    "PATCH",
-    "POST",
-    "PUT",
-]
+# CORS_ALLOW_METHODS = [
+#     "DELETE",
+#     "GET",
+#     "OPTIONS",
+#     "PATCH",
+#     "POST",
+#     "PUT",
+# ]
 
 
 # ---------------------------------------------------------------

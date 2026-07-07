@@ -101,7 +101,8 @@ USE_TZ = config.i18n.use_tz
 # ---------------------------------------------------------------
 CORS_ALLOW_CREDENTIALS = config.cors.allow_credentials
 CORS_ALLOWED_ORIGINS = config.cors.allowed_origins
-CORS_TRUSTED_ORIGINS = config.cors.trusted_origins
+CSRF_TRUSTED_ORIGINS = config.cors.trusted_origins
+
 INTERNAL_IPS = config.cors.internal_ips
 ALLOWED_HOSTS = config.cors.allowed_hosts
 

@@ -5,13 +5,24 @@ This module loads all environment variables
 and provides centralized access to settings.
 """
 
-from dataclasses import dataclass
 import os
-
+from pathlib import Path
 from dotenv import load_dotenv
+from dataclasses import dataclass
 
-# Load environment variables
-load_dotenv()
+# Project root (directory containing manage.py and .env)
+ROOT_DIR = Path(__file__).resolve().parents[2]
+
+ENV_FILE = ROOT_DIR / ".env"
+
+# print("=" * 60)
+# print("Loading .env from:", ENV_FILE)
+# print("Exists:", ENV_FILE.exists())
+
+load_dotenv(ENV_FILE, override=True)
+
+# print("CORS_ALLOWED_ORIGINS =", os.getenv("CORS_ALLOWED_ORIGINS"))
+# print("=" * 60)
 
 
 @dataclass(frozen=True)
@@ -186,7 +197,7 @@ class Config:
 
         value = Config._get_required(key)
 
-        return [item.strip() for item in value.split(",")]
+        return [item.strip() for item in value.split(",") if item.strip()]
 
     @staticmethod
     def _get_bool(key: str) -> bool:
