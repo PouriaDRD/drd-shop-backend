@@ -16,7 +16,7 @@ from finance.enums import (
 def receipt_upload_path(instance, filename):
     ext = filename.rsplit(".", 1)[-1]
     return (
-        f"receipts/deposits/"
+        f"receipts/refunds/"
         f"{instance.transaction.wallet.user.id}/"
         f"{instance.id}.{ext}"
     )
