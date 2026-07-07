@@ -79,6 +79,19 @@ class AuthConfig:
     refresh_token_lifetime: int
 
 
+@dataclass(frozen=True)
+class CorsConfig:
+    """
+    CORS configuration.
+    """
+
+    allow_credentials: bool
+    allowed_origins: list
+    trusted_origins: list
+    internal_ips: list
+    allowed_hosts: list
+
+
 class Config:
     """
     Main application configuration class.
@@ -129,6 +142,14 @@ class Config:
             refresh_token_lifetime=self._get_int("REFRESH_TOKEN_LIFETIME"),
         )
 
+        self.cors = CorsConfig(
+            allow_credentials=self._get_bool("CORS_ALLOW_CREDENTIALS"),
+            allowed_origins=self._get_list("CORS_ALLOWED_ORIGINS"),
+            trusted_origins=self._get_list("CSRF_TRUSTED_ORIGINS"),
+            internal_ips=self._get_list("INTERNAL_IPS"),
+            allowed_hosts=self._get_list("ALLOWED_HOSTS"),
+        )
+
     @staticmethod
     def _get_required(key: str) -> str:
         """
@@ -150,6 +171,22 @@ class Config:
             raise ValueError(f"{key} is missing in .env")
 
         return value
+
+    @staticmethod
+    def _get_list(key: str) -> list:
+        """
+        Get list environment variable.
+
+        Args:
+            key: Environment variable name.
+
+        Returns:
+            list: Parsed list value.
+        """
+
+        value = Config._get_required(key)
+
+        return [item.strip() for item in value.split(",")]
 
     @staticmethod
     def _get_bool(key: str) -> bool:
