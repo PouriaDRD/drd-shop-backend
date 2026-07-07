@@ -46,7 +46,7 @@ class RegisterAPIView(CreateAPIView):
 
         except ValidationError as e:
             logger.warning(f"Error registering user: {e.get_codes()}")
-            if "user_already_exists" in e.get_codes():
+            if "user_already_exists" in e.get_codes():  # type: ignore
                 return APIResponse.error(
                     message=f"حساب کاربری قبلا ایجاد شده است.",
                     status_code=status.HTTP_400_BAD_REQUEST,

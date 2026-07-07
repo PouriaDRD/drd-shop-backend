@@ -22,6 +22,7 @@ urlpatterns = [
     path(base_url + "notifications/", include("notifications.api.urls")),
     path(base_url + "billing/", include("billing.api.urls")),
     path(base_url + "commerce/", include("commerce.api.urls")),
+    path(base_url + "support/", include("support.api.urls")),
 ]
 
 
