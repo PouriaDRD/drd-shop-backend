@@ -15,6 +15,10 @@ class UserRepository:
         return UserModel.objects.filter(email=email).first()
 
     @staticmethod
+    def get_by_id(user_id: str) -> Optional[UserModel]:
+        return UserModel.objects.filter(id=user_id).first()
+
+    @staticmethod
     def save(user: UserModel, update_fields: list[str] | None = None):
         user.save(update_fields=update_fields)
         return user

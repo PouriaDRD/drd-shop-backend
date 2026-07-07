@@ -76,7 +76,7 @@ class OrderService:
 
         OrderItemRepository.bulk_create(order_items)
 
-        NotificationService.create(
+        NotificationService.create_success(
             user=user,
             title="سفارش شما دریافت شد",
             message="بابت خریدتون ممنونیم، پس از بررسی و آماده سازی، سفارشتون قابل دریافت خواهد بود!",
@@ -120,7 +120,7 @@ class OrderService:
 
         OrderService.create_vpn_subscription(items)
 
-        NotificationService.create(
+        NotificationService.create_success(
             user=user,
             title="سفارش شما تایید شد",
             message="سفارش شما با موفقیت تایید شد و در بخش سرویس های من قابل دریافت و مشاهده است!",
@@ -158,7 +158,7 @@ class OrderService:
         OrderRepository.reject(order)
         user = order.user
 
-        NotificationService.create(
+        NotificationService.create_success(
             user=user,
             title="سفارش شما رد شد",
             message="متاسفانه سفارش شما تایید نشد، مبلغ به کیف پول شما برگشت داده شد!",

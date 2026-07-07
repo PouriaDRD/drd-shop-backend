@@ -1,6 +1,8 @@
 from django.db import transaction
 
 from accounts.models import UserModel
+from accounts.repositories import UserRepository
+
 from notifications.enums import NotificationType
 from notifications.models import NotificationModel
 from notifications.repositories import NotificationRepository
@@ -11,17 +13,44 @@ class NotificationService:
 
     @staticmethod
     @transaction.atomic
-    def create(
+    def create_success(
         user: UserModel,
         title: str,
         message: str,
-        notification_type: NotificationType = NotificationType.INFO,
     ):
         return NotificationRepository.create(
             user=user,
             title=title,
             message=message,
-            notification_type=notification_type,
+            notification_type=NotificationType.INFO,
+        )
+
+    @staticmethod
+    @transaction.atomic
+    def create_error(email: str, title: str, message: str):
+        user = UserRepository.get_by_email(email)
+        if not user:
+            return
+
+        return NotificationRepository.create(
+            user=user,
+            title=title,
+            message=message,
+            notification_type=NotificationType.ERROR,
+        )
+
+    @staticmethod
+    @transaction.atomic
+    def create_warning(email: str, title: str, message: str):
+        user = UserRepository.get_by_email(email)
+        if not user:
+            return
+
+        return NotificationRepository.create(
+            user=user,
+            title=title,
+            message=message,
+            notification_type=NotificationType.WARNING,
         )
 
     @staticmethod

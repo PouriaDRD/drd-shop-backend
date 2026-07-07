@@ -141,7 +141,7 @@ class RefundService:
 
         RefundRepository.approve_user_refund(refund, tx)
 
-        NotificationService.create(
+        NotificationService.create_success(
             user=wallet.user,
             title="تراکنش استرداد تایید شد",
             message="تراکنش استرداد با موفقیت تایید شد، مبلغ آن به حساب بانکی شما برگشت داده شد!",

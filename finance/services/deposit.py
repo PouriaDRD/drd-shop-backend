@@ -32,7 +32,7 @@ class DepositService:
 
         deposit = DepositRepository.create(wallet, **validated_data)
 
-        NotificationService.create(
+        NotificationService.create_success(
             user=wallet.user,
             title="درخواست واریز شما دریافت شد",
             message="پس از بررسی نتیجه به شما اعلام می شود!",
@@ -100,7 +100,7 @@ class DepositService:
 
         DepositRepository.approve(deposit, transaction_obj)
 
-        NotificationService.create(
+        NotificationService.create_success(
             user=wallet.user,
             title="درخواست واریز تایید شد!",
             message="درخواست واریز شما تایید شد و مبلغ آن به کیف پول افزوده شد!",
@@ -135,7 +135,7 @@ class DepositService:
 
         DepositRepository.reject(deposit, admin_note)
 
-        NotificationService.create(
+        NotificationService.create_success(
             user=deposit.wallet.user,
             title="درخواست واریز رد شد",
             message="برای اطلاعات بیشتر با پشتیبانی در تماس باشید!",

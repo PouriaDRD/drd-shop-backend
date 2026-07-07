@@ -7,9 +7,12 @@ from .views import (
     TokenRefreshAPIView,
     SendLoginOTPAPIView,
     VerifyLoginOTPAPIView,
+    MyLoginHistoryAPIView,
 )
 
 urlpatterns = [
+    # Login history
+    path("login-history/", MyLoginHistoryAPIView.as_view(), name="login-history"),
     # Normal login
     path("login/", LoginAPIView.as_view(), name="login"),
     path("register/", RegisterAPIView.as_view(), name="register"),
