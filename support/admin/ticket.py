@@ -54,6 +54,7 @@ class TicketAdmin(admin.ModelAdmin):
     list_display = (
         "user",
         "title",
+        "category",
         "status",
         "priority",
         "created_at",
