@@ -15,11 +15,7 @@ from finance.enums import (
 
 def receipt_upload_path(instance, filename):
     ext = filename.rsplit(".", 1)[-1]
-    return (
-        f"receipts/refunds/"
-        f"{instance.transaction.wallet.user.id}/"
-        f"{instance.id}.{ext}"
-    )
+    return f"receipts/refunds/" f"{instance.wallet.user.id}/" f"{instance.id}.{ext}"
 
 
 class RefundToUserRequestModel(models.Model):
