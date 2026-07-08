@@ -1,11 +1,32 @@
 from rest_framework import serializers
+from django.core.exceptions import ValidationError
 
-from support.models import TicketModel
 
 from .ticket_message import TicketMessageSerializer
 
+from support.models import TicketModel
 from support.enums import TicketCategory
 from support.services import TicketService
+
+MAX_FILE_SIZE = 10 * 1024 * 1024  # 10 MB
+
+
+def validate_file_size(file):
+    if file.size > MAX_FILE_SIZE:
+        raise ValidationError("حجم هر فایل نباید بیشتر از 10 مگابایت باشد.")
+
+    return file
+
+
+class TicketAttachmentField(serializers.FileField):
+
+    def __init__(self, **kwargs):
+        super().__init__(
+            validators=[
+                validate_file_size,
+            ],
+            **kwargs,
+        )
 
 
 class TicketCreateSerializer(serializers.Serializer):
@@ -20,8 +41,9 @@ class TicketCreateSerializer(serializers.Serializer):
     )
 
     attachments = serializers.ListField(
-        child=serializers.FileField(),
+        child=TicketAttachmentField(),
         required=False,
+        max_length=5,
     )
 
     def create(self, validated_data):
@@ -78,8 +100,9 @@ class TicketReplySerializer(serializers.Serializer):
     )
 
     attachments = serializers.ListField(
-        child=serializers.FileField(),
+        child=TicketAttachmentField(),
         required=False,
+        max_length=5,
     )
 
     def create(self, validated_data):
