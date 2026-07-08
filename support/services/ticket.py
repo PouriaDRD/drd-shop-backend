@@ -184,7 +184,8 @@ class TicketService:
             message=(f"ما به تیکت شما با موضوغ «{ticket.title}» پاسخ دادیم."),
         )
 
-        TicketService.send_reply_email(ticket.user, ticket)
+        if ticket.user.email_verified:
+            TicketService.send_reply_email(ticket.user, ticket)
 
         return
 
