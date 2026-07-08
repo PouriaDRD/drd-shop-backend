@@ -42,10 +42,13 @@ class TicketListSerializer(serializers.ModelSerializer):
         fields = (
             "id",
             "title",
+            "category",
             "status",
             "updated_at",
             "created_at",
         )
+
+        read_only_fields = ["__all__"]
 
 
 class TicketDetailSerializer(serializers.ModelSerializer):
