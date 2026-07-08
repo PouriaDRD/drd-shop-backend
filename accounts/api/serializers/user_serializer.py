@@ -11,6 +11,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     referral_code = serializers.SerializerMethodField()
     total_referrals = serializers.SerializerMethodField()
+    total_paid = serializers.SerializerMethodField()
 
     wallet = WalletSerializer(read_only=True)
 
@@ -27,6 +28,7 @@ class UserSerializer(serializers.ModelSerializer):
             "created_at",
             "referral_code",
             "total_referrals",
+            "total_paid",
             "wallet",
         )
 
@@ -53,3 +55,11 @@ class UserSerializer(serializers.ModelSerializer):
             return obj.referral_code.signups
 
         return 0
+
+    def get_total_paid(self, obj):
+        """
+        Return total referral signups.
+        """
+
+        if hasattr(obj, "referral_code"):
+            return obj.referral_code.total_paid
