@@ -1,8 +1,32 @@
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 
 from finance.services import DepositService
 from finance.models import DepositRequestModel
 from finance.enums import DepositPaymentMethod
+
+MAX_RECEIPT_SIZE = 5 * 1024 * 1024  # 5 MB
+
+
+def validate_receipt_size(image):
+    if image.size > MAX_RECEIPT_SIZE:
+        raise ValidationError("حجم تصویر رسید نباید بیشتر از ۵ مگابایت باشد.")
+
+    return image
+
+
+ALLOWED_IMAGE_TYPES = [
+    "image/jpeg",
+    "image/png",
+    "image/webp",
+]
+
+
+def validate_receipt_file_type(image):
+    if image.content_type not in ALLOWED_IMAGE_TYPES:
+        raise ValidationError("فرمت تصویر باید JPG، PNG یا WEBP باشد.")
+
+    return image
 
 
 class DepositCreateSerializer(serializers.ModelSerializer):
@@ -88,8 +112,13 @@ class DepositCreateSerializer(serializers.ModelSerializer):
 
     receipt_image = serializers.ImageField(
         required=True,
+        validators=[
+            validate_receipt_size,
+            validate_receipt_file_type,
+        ],
         error_messages={
             "required": "Receipt image is required.",
+            "invalid_image": "Uploaded file must be a valid image.",
         },
     )
 
