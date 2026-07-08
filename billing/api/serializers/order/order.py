@@ -19,6 +19,8 @@ class OrderSerializer(serializers.ModelSerializer):
         fields = (
             "id",
             "status",
+            "discount_amount",
+            "subtotal",
             "total_price",
             "items",
             "created_at",

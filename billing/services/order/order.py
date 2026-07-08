@@ -8,10 +8,10 @@ from django.db.models import QuerySet
 from accounts.models import UserModel
 
 from commerce.enums import ProductType
-from commerce.models import V2rayVPNModel
+from commerce.models import V2rayVPNModel, CouponModel
+from commerce.services.coupon import CouponService
 
 from notifications.services import NotificationService
-
 from billing.enums import OrderStatus
 from billing.repositories.order import OrderRepository, OrderItemRepository
 from billing.models import (
@@ -40,7 +40,12 @@ class OrderService:
     @staticmethod
     @transaction.atomic
     def place_order(
-        user: UserModel, cart_items: QuerySet[CartItemModel], total_price: int
+        user: UserModel,
+        cart_items: QuerySet[CartItemModel],
+        total_price: int,
+        coupon: CouponModel | None = None,
+        discount_amount: int = 0,
+        subtotal: int = 0,
     ) -> OrderModel:
         """
         Create a new order from cart items.
@@ -58,6 +63,9 @@ class OrderService:
             user=user,
             status=OrderStatus.PENDING,
             total_price=total_price,
+            coupon=coupon,
+            discount_amount=discount_amount,
+            subtotal=subtotal,
         )
 
         order_items: list[OrderItemModel] = []
@@ -119,6 +127,14 @@ class OrderService:
         ReferralService.create_reward(
             order=order,
         )
+
+        if order.coupon:
+            CouponService.apply_coupon(
+                coupon=order.coupon,
+                wallet=user.wallet,  # type: ignore
+                order=order,
+                discount=order.discount_amount,
+            )
 
         items = OrderItemRepository.get_by_order(order)
 

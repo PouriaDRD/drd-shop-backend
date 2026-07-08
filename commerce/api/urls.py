@@ -5,7 +5,7 @@ from .views.product import ProductListAPIView, ProductDetailAPIView
 
 from .views.coupon import (
     ApplyCouponAPIView,
-    RemoveCouponAPIView,
+    # RemoveCouponAPIView,
 )
 
 from .views.provisions import V2rayVPNListAPIView
@@ -25,6 +25,6 @@ urlpatterns = [
         name="product-detail",
     ),
     # Coupons
-    path("my-cart/apply-coupon/", ApplyCouponAPIView.as_view()),
-    path("my-cart/remove-coupon/", RemoveCouponAPIView.as_view()),
+    path("apply-coupon/", ApplyCouponAPIView.as_view()),
+    # path("remove-coupon/", RemoveCouponAPIView.as_view()),
 ]

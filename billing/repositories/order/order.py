@@ -18,11 +18,13 @@ class OrderRepository:
         user: UserModel,
         status: OrderStatus = OrderStatus.PENDING,
         total_price,
+        **kwargs,
     ) -> OrderModel:
         return OrderModel.objects.create(
             user=user,
             status=status,
             total_price=total_price,
+            **kwargs,
         )
 
     @staticmethod

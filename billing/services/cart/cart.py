@@ -3,7 +3,7 @@ from accounts.models import UserModel
 from rest_framework.exceptions import ValidationError
 
 from commerce.services.coupon import CouponService
-from commerce.models import ProductModel, ProductPlanModel
+from commerce.models import ProductModel, ProductPlanModel, CouponModel
 
 from billing.models import CartModel, CartItemModel
 from billing.repositories.cart import CartRepository, CartItemRepository
@@ -60,7 +60,11 @@ class CartService:
         item.total_price = item.unit_price * quantity
         item.save()
 
-        CartService.recalculate(item.cart)
+        new_cart = CartService.recalculate(item.cart)
+
+        if new_cart.total_price <= 0:
+            CartRepository.reset_cart(new_cart)
+            return item
 
         return item
 
@@ -68,8 +72,13 @@ class CartService:
     @transaction.atomic
     def remove_item(item: CartItemModel):
         cart = item.cart
+
         CartItemRepository.delete(item)
-        CartService.recalculate(cart)
+        new_cart = CartService.recalculate(cart)
+
+        if new_cart.total_price <= 0:
+            CartRepository.reset_cart(new_cart)
+
         return True
 
     @staticmethod
@@ -90,6 +99,19 @@ class CartService:
         cart.discount = discount
         cart.total_price = max(subtotal - discount, 0)
 
-        CartRepository.save(cart)
+        new_cart = CartRepository.save(cart)
 
-        return cart
+        return new_cart
+
+    @staticmethod
+    @transaction.atomic
+    def add_coupon_to_cart(cart: CartModel, coupon: CouponModel, user_id):
+        discount = CouponService.calculate_discount(
+            coupon=coupon, subtotal=cart.subtotal, user_id=user_id
+        )
+
+        if discount > 0:
+            cart.coupon = coupon
+            cart.save(update_fields=["coupon"])
+            new_cart = CartService.recalculate(cart)
+            return new_cart

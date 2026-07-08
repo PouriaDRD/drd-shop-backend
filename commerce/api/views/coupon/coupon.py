@@ -3,6 +3,7 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.request import Request
 from rest_framework.generics import CreateAPIView
+from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.throttling import ScopedRateThrottle
 
@@ -36,28 +37,44 @@ class ApplyCouponAPIView(CreateAPIView):
             serializer.is_valid(raise_exception=True)
 
             code = serializer.validated_data["code"]
+
             coupon = CouponModel.objects.filter(
                 code=code,
                 is_active=True,
             ).first()
-            cart = CartService.get_or_create_cart(request.user)
 
-            cart.coupon = coupon
-            cart.save()
+            if not coupon:
+                raise ValidationError("کد تخفیف اشتباه است.")
 
-            CartService.recalculate(cart)
+            new_cart = CartService.add_coupon_to_cart(
+                cart=request.user.cart,
+                coupon=coupon,
+                user_id=str(request.user.id),
+            )
 
-            logger.info(f"Coupon applied: {coupon.code}, wallet: {cart.user.email}")
+            if not new_cart:
+                raise ValidationError("کد تخفیف اشتباه است.")
+
+            logger.info(f"Coupon applied: {code}, user: {str(request.user)}")
             return APIResponse.success(
-                data=CartSerializer(cart).data,
+                data={
+                    "success": True,
+                },
                 status_code=status.HTTP_200_OK,
+            )
+
+        except ValidationError as e:
+            logger.warning(f"Error while applying coupon: {e.get_codes()}")
+            return APIResponse.error(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                message="کد تخفیف اشتباه است.",
             )
 
         except Exception as e:
             logger.error(f"Error while applying coupon: {e}")
             return APIResponse.error(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                message="خطا در افزودن کوپن.",
+                message="خطا در اعمال کد تخفیف.",
             )
 
 
@@ -91,5 +108,5 @@ class RemoveCouponAPIView(APIView):
             logger.error(f"Error while removing coupon: {e}")
             return APIResponse.error(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                message="خطا در حذف کوپن.",
+                message="خطا در حذف کد تخفیف.",
             )

@@ -43,9 +43,12 @@ class CheckoutService:
             raise ValidationError("موجودی کافی نیست")
 
         order = OrderService.place_order(
-            user,
-            items,
-            cart.total_price,
+            user=user,
+            cart_items=items,
+            total_price=cart.total_price,
+            coupon=cart.coupon,
+            discount_amount=cart.discount,
+            subtotal=cart.subtotal,
         )
 
         from finance.services.purchase import PurchaseService

@@ -11,7 +11,7 @@ class CouponUsageAdmin(admin.ModelAdmin):
         "coupon",
         "wallet",
         "order",
-        "discount_amount",
+        "discount_amount_display",
         "created_at",
     )
 
@@ -45,3 +45,6 @@ class CouponUsageAdmin(admin.ModelAdmin):
 
     def has_delete_permission(self, request, obj=None):
         return DEV
+
+    def discount_amount_display(self, obj):
+        return f"{obj.discount_amount:,}"

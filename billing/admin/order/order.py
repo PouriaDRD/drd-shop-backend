@@ -14,8 +14,10 @@ class OrderAdmin(admin.ModelAdmin):
 
     list_display = (
         "user",
-        "status_badge",
         "total_price_display",
+        "discount_amount",
+        "subtotal",
+        "status_badge",
         "updated_at",
         "created_at",
     )

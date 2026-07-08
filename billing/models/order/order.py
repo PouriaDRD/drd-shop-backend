@@ -3,6 +3,7 @@ from django.db import models
 
 from billing.enums import OrderStatus
 from accounts.models import UserModel
+from commerce.models import CouponModel
 
 
 class OrderModel(models.Model):
@@ -26,6 +27,17 @@ class OrderModel(models.Model):
         choices=OrderStatus.choices,
         default=OrderStatus.PENDING,
     )
+
+    coupon = models.ForeignKey(
+        CouponModel,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+    )
+
+    discount_amount = models.PositiveBigIntegerField(default=0)
+
+    subtotal = models.PositiveBigIntegerField(default=0)
 
     total_price = models.PositiveBigIntegerField()
 

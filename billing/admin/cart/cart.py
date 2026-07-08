@@ -9,9 +9,9 @@ DEV = False
 class CartAdmin(admin.ModelAdmin):
     list_display = (
         "user",
+        "total_price",
         "subtotal",
         "discount",
-        "total_price",
         "updated_at",
         "created_at",
     )
