@@ -10,7 +10,7 @@ from accounts.repositories import (
 
 from billing.enums import OrderStatus
 from finance.enums import TransactionType
-from finance.services import TransactionService
+from finance.services import TransactionService, LedgerService
 
 from notifications.services import NotificationService
 
@@ -51,6 +51,13 @@ class RewardService:
 
             TransactionService.approve(str(transaction.id))
 
+            LedgerService.create(
+                wallet=reward.inviter.wallet,  # type: ignore
+                transaction=transaction,
+                transaction_type=TransactionType.REFERRAL_REWARD,
+                amount=reward.reward_amount,
+            )
+
             ReferralRewardRepository.paid(
                 reward,
                 transaction,
@@ -59,7 +66,7 @@ class RewardService:
             NotificationService.create_success(
                 user=reward.inviter,
                 title="پاداش معرفی واریز شد",
-                message=f"{str(reward.reward_amount):,} تومان به کیف پول شما اضافه شد.",
+                message=f"{reward.reward_amount:,} تومان به کیف پول شما اضافه شد.",
             )
 
             referral = ReferralCodeRepository.get_by_user(reward.inviter)

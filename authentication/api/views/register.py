@@ -51,6 +51,13 @@ class RegisterAPIView(CreateAPIView):
                     message=f"حساب کاربری قبلا ایجاد شده است.",
                     status_code=status.HTTP_400_BAD_REQUEST,
                 )
+            # {'referral_code': [ErrorDetail(string='کد دعوت نامعتبر است.', code='invalid_code')]}
+            if "invalid_code" in e.get_codes() or "referral_code" in e.detail:  # type: ignore
+                return APIResponse.error(
+                    message=f"کد دعوت نامعتبر است.",
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                )
+
             return APIResponse.error(
                 message=f"خطا در ایجاد حساب کاربری",
                 status_code=status.HTTP_400_BAD_REQUEST,

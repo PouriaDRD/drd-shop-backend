@@ -9,6 +9,7 @@ class ReferralCodeAdmin(admin.ModelAdmin):
     list_display = (
         "code",
         "user",
+        "signups",
         "total_earned",
         "total_paid",
         "created_at",
@@ -22,6 +23,11 @@ class ReferralCodeAdmin(admin.ModelAdmin):
     readonly_fields = (
         "id",
         # "code",
+        "signups",
+        "clicks",
+        "total_earned",
+        "total_paid",
+        "orders",
         "created_at",
         "updated_at",
     )

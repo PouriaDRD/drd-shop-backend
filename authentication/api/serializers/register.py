@@ -2,6 +2,7 @@ from rest_framework import serializers
 from django.core.validators import EmailValidator
 
 from authentication.services import AuthService
+from accounts.repositories import ReferralCodeRepository
 
 
 class RegisterSerializer(serializers.Serializer):
@@ -47,6 +48,22 @@ class RegisterSerializer(serializers.Serializer):
     )
 
     def validate(self, attrs):
+
+        referral_code = attrs.get("referral_code")
+
+        if not referral_code:
+            raise serializers.ValidationError(
+                {"referral_code": "کد دعوت اجباری است."},
+                code="invalid_code",
+            )
+
+        res = ReferralCodeRepository.get_by_code(referral_code)
+
+        if not res:
+            raise serializers.ValidationError(
+                {"referral_code": "کد دعوت نامعتبر است."},
+                code="invalid_code",
+            )
 
         if attrs["password"] != attrs["password_confirm"]:
             raise serializers.ValidationError(

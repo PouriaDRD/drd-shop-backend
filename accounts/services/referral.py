@@ -2,7 +2,7 @@ import string
 import secrets
 from decimal import Decimal
 from django.db import transaction
-
+from rest_framework.exceptions import ValidationError
 
 from accounts.models import UserModel
 from accounts.enums import RewardStatus
@@ -53,13 +53,15 @@ class ReferralService:
         referral = ReferralCodeRepository.get_by_code(code)
 
         if referral is None:
-            raise ValueError("Referral code not found.")
+            raise ValidationError("Referral code not found.", code="invalid_code")
 
         if referral.user.id == user.id:
-            raise ValueError("You cannot use your own referral code.")
+            raise ValidationError(
+                "You cannot use your own referral code.", code="invalid_code"
+            )
 
         if user.referred_by:
-            raise ValueError("Referral already applied.")
+            raise ValidationError("Referral already applied.", code="invalid_code")
 
         user.referred_by = referral.user  # type: ignore
         user.save(update_fields=["referred_by"])
@@ -135,7 +137,7 @@ class ReferralCodeGenerator:
     @classmethod
     def generate(cls) -> str:
         while True:
-            code = "DRD-".join(secrets.choice(cls.CHARS) for _ in range(cls.LENGTH))
+            code = "".join(secrets.choice(cls.CHARS) for _ in range(cls.LENGTH))
 
             if not ReferralCodeRepository.get_by_code(code):
-                return code
+                return f"DRD-{code}"
