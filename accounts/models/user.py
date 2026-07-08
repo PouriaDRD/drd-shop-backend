@@ -39,6 +39,15 @@ class UserModel(AbstractBaseUser, PermissionsMixin):
         default=UserRole.USER,
         db_index=True,
     )
+
+    referred_by = models.ForeignKey(
+        "self",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="referrals",
+    )
+
     # Timestamps for user creation and last update
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
