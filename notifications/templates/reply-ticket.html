@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>پاسخ جدید به تیکت</title>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #f6f7fb;
+            font-family: ui-sans-serif, system-ui, -apple-system;
+            color: #111827;
+            direction: rtl;
+            text-align: right;
+        }
+
+        .wrapper {
+            padding: 40px 16px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .card {
+            width: 100%;
+            max-width: 560px;
+            background: #ffffff;
+            border-radius: 14px;
+            border: 1px solid #e5e7eb;
+            overflow: hidden;
+        }
+
+        .header {
+            padding: 20px;
+            background: #1447e6;
+            color: #ffffff;
+            text-align: center;
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .content {
+            padding: 24px;
+        }
+
+        .title {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .text {
+            font-size: 13px;
+            color: #6b7280;
+            line-height: 1.9;
+            margin-bottom: 20px;
+        }
+
+        .info-box {
+            margin: 20px 0;
+            padding: 16px;
+            border: 1px solid #e5e7eb;
+            background: #f9fafb;
+            border-radius: 12px;
+        }
+
+        .row {
+            margin-bottom: 10px;
+            font-size: 13px;
+            color: #374151;
+        }
+
+        .row:last-child {
+            margin-bottom: 0;
+        }
+
+        .row span {
+            font-weight: 600;
+            color: #111827;
+        }
+
+        .reply-box {
+            margin-top: 20px;
+            padding: 18px;
+            border-radius: 12px;
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+        }
+
+        .reply-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #1d4ed8;
+            margin-bottom: 10px;
+        }
+
+        .reply-text {
+            font-size: 13px;
+            line-height: 2;
+            color: #374151;
+            white-space: pre-wrap;
+        }
+
+        .success {
+            margin-top: 20px;
+            padding: 12px;
+            border-radius: 10px;
+            background: #ecfdf5;
+            border: 1px solid #a7f3d0;
+            color: #065f46;
+            font-size: 12px;
+            line-height: 1.8;
+        }
+
+        .alert {
+            margin-top: 18px;
+            padding: 12px;
+            border-radius: 10px;
+            background: #fff7ed;
+            border: 1px solid #fed7aa;
+            color: #9a3412;
+            font-size: 12px;
+            line-height: 1.8;
+        }
+
+        .button-wrapper {
+            text-align: center;
+            margin-top: 28px;
+        }
+
+        .button {
+            display: inline-block;
+            background: #1447e6;
+            color: #ffffff !important;
+            text-decoration: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .footer {
+            padding: 16px;
+            text-align: center;
+            font-size: 11px;
+            color: #9ca3af;
+            background: #fafafa;
+            border-top: 1px solid #eeeeee;
+        }
+
+        .brand {
+            color: #1447e6;
+            font-weight: 600;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="wrapper">
+        <div class="card">
+
+            <!-- Header -->
+            <div class="header">
+                پاسخ جدید برای تیکت شما
+            </div>
+
+            <!-- Content -->
+            <div class="content">
+
+                <div class="title">
+                    سلام {{ name }} 👋
+                </div>
+
+                <div class="text">
+                    تیم پشتیبانی به تیکت شما پاسخ داده است.
+                    برای مشاهده جزئیات کامل و ادامه گفتگو، وارد پنل کاربری خود شوید.
+                </div>
+
+                <!-- Ticket Information -->
+                <div class="info-box">
+                    <div class="row">
+                        عنوان:
+                        <span>{{ ticket_title }}</span>
+                    </div>
+
+                    <div class="row">
+                        دسته‌بندی:
+                        <span>{{ ticket_category }}</span>
+                    </div>
+                </div>
+
+                <!-- Success -->
+                <div class="success">
+                    در صورت نیاز می‌توانید از طریق همین تیکت پاسخ خود را ارسال کرده و گفتگو را ادامه دهید.
+                </div>
+
+                <!-- Alert -->
+                <div class="alert">
+                    لطفاً از پاسخ دادن به این ایمیل خودداری کنید؛ تمامی مکاتبات از طریق بخش تیکت‌های پنل کاربری انجام
+                    می‌شود.
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="footer">
+                این پیام به صورت خودکار از طرف
+                <span class="brand">{{ site_name }}</span>
+                ارسال شده است.
+            </div>
+
+        </div>
+    </div>
+
+</body>
+
+</html>

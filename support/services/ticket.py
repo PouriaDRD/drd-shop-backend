@@ -7,12 +7,15 @@ from support.repositories import (
     TicketAttachmentRepository,
 )
 
-
+from support.models import TicketModel
 from support.enums import (
     TicketStatus,
     TicketPriority,
     TicketCategory,
 )
+
+from notifications.tasks import send_email_task
+from notifications.services import NotificationService
 
 
 class TicketService:
@@ -142,6 +145,12 @@ class TicketService:
         if ticket.user.id != user.id:
             raise PermissionDenied()
 
+        NotificationService.create_success(
+            user=user,
+            title="تیکت بسته شد!",
+            message=(f"تیکت با موضوع «{ticket.title}» بسته شد."),
+        )
+
         return TicketRepository.close(
             ticket,
         )
@@ -169,4 +178,52 @@ class TicketService:
             status=TicketStatus.ANSWERED,
         )
 
+        NotificationService.create_success(
+            user=ticket.user,
+            title="پاسخ به تیکت ارسال شد!",
+            message=(f"ما به تیکت شما با موضوغ «{ticket.title}» پاسخ دادیم."),
+        )
+
+        TicketService.send_reply_email(ticket.user, ticket)
+
         return
+
+    @staticmethod
+    def send_reply_email(user, ticket: TicketModel):
+
+        category_map = {
+            TicketCategory.GENERAL.value: "عمومی",
+            TicketCategory.ORDER.value: "سفارش",
+            TicketCategory.TECHNICAL.value: "فنی",
+            TicketCategory.PAYMENT.value: "پرداخت",
+        }
+
+        send_email_task.delay(
+            template_slug="reply-ticket",
+            recipient_email=user.email,
+            recipient_name=str(user),
+            context={
+                "name": str(user),
+                "ticket_title": ticket.title,
+                "ticket_category": category_map[ticket.category],
+                "ticket_status": ticket.status,
+                "site_name": "DRD Shop",
+            },
+        )  # type: ignore
+
+
+#         {{ name }}
+# {{ site_name }}
+
+# {{ ticket_id }}
+# {{ ticket_title }}
+# {{ ticket_category }}
+# {{ ticket_priority }}
+# {{ ticket_status }}
+
+# {{ replied_by }}
+# {{ replied_at }}
+
+# {{ reply }}
+
+# {{ ticket_url }}
