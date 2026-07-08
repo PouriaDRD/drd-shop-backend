@@ -1,5 +1,5 @@
 from django.contrib import admin
-
+from django.utils.html import format_html
 from commerce.models import ProductPlanModel
 
 
@@ -8,7 +8,7 @@ class ProductPlanAdmin(admin.ModelAdmin):
     list_display = (
         "title",
         "product",
-        "price",
+        "price_display",
         "is_available",
         "is_active",
         "updated_at",
@@ -64,3 +64,18 @@ class ProductPlanAdmin(admin.ModelAdmin):
     def make_unavailable(self, request, queryset):
         updated = queryset.update(is_available=False)
         self.message_user(request, f"{updated} are not available")
+
+    # =========================
+    # DISPLAY
+    # =========================
+
+    def price_display(self, obj):
+        if obj.price is None:
+            return "-"
+
+        amount = f"{obj.price:,.0f}"
+
+        return format_html(
+            "<span>{}</span>",
+            amount,
+        )
