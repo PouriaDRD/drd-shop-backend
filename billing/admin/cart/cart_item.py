@@ -14,6 +14,7 @@ class CartItemAdmin(admin.ModelAdmin):
         "quantity",
         "unit_price",
         "total_price",
+        "is_renewal",
         "updated_at",
         "created_at",
     )

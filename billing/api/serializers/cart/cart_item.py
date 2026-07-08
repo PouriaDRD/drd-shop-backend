@@ -20,6 +20,8 @@ class CartItemSerializer(serializers.ModelSerializer):
             "plan_title",
             "plan_id",
             "quantity",
+            "is_renewal",
+            "service_id",
             "unit_price",
             "total_price",
         )

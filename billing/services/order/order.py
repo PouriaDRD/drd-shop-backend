@@ -78,6 +78,8 @@ class OrderService:
                     plan=item.plan,
                     quantity=item.quantity,
                     price=item.unit_price,
+                    is_renewal=item.is_renewal,
+                    service_id=item.service_id,
                 )
             )
 
@@ -220,6 +222,10 @@ class OrderService:
             if item.product.type != ProductType.VPN:
                 continue
 
+            old_service = None
+            if item.service_id:
+                old_service = V2rayVPNModel.objects.get(id=item.service_id)
+
             days = OrderService.get_plan_days(item)
             expires_at = now + timedelta(days=days)
 
@@ -227,13 +233,21 @@ class OrderService:
                 [
                     V2rayVPNModel(
                         order_item=item,
-                        subscription_link="",
-                        content="",
                         expires_at=expires_at,
+                        content=old_service.content if old_service else "",
+                        subscription_link=(
+                            old_service.subscription_link if old_service else ""
+                        ),
+                        subscription_json_link=(
+                            old_service.subscription_json_link if old_service else ""
+                        ),
                     )
                     for _ in range(item.quantity)
                 ]
             )
+
+            if old_service:
+                old_service.delete()
 
         V2rayVPNModel.objects.bulk_create(vpn_objects)
 

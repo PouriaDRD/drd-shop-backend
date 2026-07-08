@@ -21,7 +21,13 @@ class CartService:
     @staticmethod
     @transaction.atomic
     def add_item(
-        user: UserModel, *, product: ProductModel, plan: ProductPlanModel, quantity=1
+        user: UserModel,
+        *,
+        product: ProductModel,
+        plan: ProductPlanModel,
+        quantity=1,
+        is_renewal=False,
+        service_id=None,
     ):
         cart = CartService.get_or_create_cart(user)
 
@@ -41,6 +47,8 @@ class CartService:
                 "quantity": quantity,
                 "unit_price": plan.price,
                 "total_price": plan.price * quantity,
+                "is_renewal": is_renewal,
+                "service_id": service_id,
             },
         )
 

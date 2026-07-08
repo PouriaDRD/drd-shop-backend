@@ -6,6 +6,7 @@ class AddCartItemSerializer(serializers.Serializer):
     plan_id = serializers.UUIDField()
     quantity = serializers.IntegerField(min_value=1, default=1)
     is_renewal = serializers.BooleanField(default=False, required=False)
+    service_id = serializers.UUIDField(required=False, allow_null=True)
 
 
 class AddCartItemsSerializer(serializers.Serializer):

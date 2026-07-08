@@ -27,6 +27,7 @@ class OrderItemAdmin(admin.ModelAdmin):
         "plan",
         "quantity",
         "price_display",
+        "is_renewal",
         "created_at",
     )
 

@@ -39,6 +39,16 @@ class CartItemModel(models.Model):
 
     total_price = models.PositiveBigIntegerField()
 
+    is_renewal = models.BooleanField(
+        default=False,
+    )
+
+    service_id = models.UUIDField(
+        null=True,
+        blank=True,
+        default=None,
+    )
+
     updated_at = models.DateTimeField(auto_now=True)
 
     created_at = models.DateTimeField(auto_now_add=True)

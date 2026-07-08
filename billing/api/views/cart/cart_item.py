@@ -37,7 +37,6 @@ class AddCartItemAPIView(CreateAPIView):
         try:
             serializer = self.get_serializer(data=request.data)
             serializer.is_valid(raise_exception=True)
-
             product = ProductModel.objects.get(
                 id=serializer.validated_data["product_id"]
             )
@@ -48,15 +47,20 @@ class AddCartItemAPIView(CreateAPIView):
                 product=product,
                 plan=plan,
                 quantity=serializer.validated_data["quantity"],
+                is_renewal=serializer.validated_data["is_renewal"],
+                service_id=serializer.validated_data["service_id"],
             )
 
             logger.info(
                 f"Cart item added: user: {request.user}, cart: {cart.id}, product: {product.title}, plan: {plan.title}"
             )
+
+            item_data = CartItemSerializer(item).data
+
             return APIResponse.success(
                 data={
                     "cart": CartSerializer(cart).data,
-                    "item": CartItemSerializer(item).data,
+                    "item": item_data,
                 },
                 status_code=status.HTTP_200_OK,
             )
