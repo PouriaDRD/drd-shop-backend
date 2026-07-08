@@ -10,7 +10,6 @@ from accounts.models import UserModel
 from commerce.enums import ProductType
 from commerce.models import V2rayVPNModel
 
-from notifications.enums import NotificationType
 from notifications.services import NotificationService
 
 from billing.enums import OrderStatus
@@ -80,7 +79,6 @@ class OrderService:
             user=user,
             title="سفارش شما دریافت شد",
             message="بابت خریدتون ممنونیم، پس از بررسی و آماده سازی، سفارشتون قابل دریافت خواهد بود!",
-            notification_type=NotificationType.INFO,
         )
 
         return order
@@ -116,6 +114,12 @@ class OrderService:
         OrderRepository.approve(order)
         user = order.user
 
+        from accounts.services import ReferralService
+
+        ReferralService.create_reward(
+            order=order,
+        )
+
         items = OrderItemRepository.get_by_order(order)
 
         OrderService.create_vpn_subscription(items)
@@ -124,7 +128,6 @@ class OrderService:
             user=user,
             title="سفارش شما تایید شد",
             message="سفارش شما با موفقیت تایید شد و در بخش سرویس های من قابل دریافت و مشاهده است!",
-            notification_type=NotificationType.INFO,
         )
 
         logger.info(
@@ -162,7 +165,6 @@ class OrderService:
             user=user,
             title="سفارش شما رد شد",
             message="متاسفانه سفارش شما تایید نشد، مبلغ به کیف پول شما برگشت داده شد!",
-            notification_type=NotificationType.INFO,
         )
 
         logger.info(

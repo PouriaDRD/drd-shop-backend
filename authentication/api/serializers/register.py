@@ -18,6 +18,14 @@ class RegisterSerializer(serializers.Serializer):
         },
     )
 
+    referral_code = serializers.CharField(
+        required=True,
+        error_messages={
+            "blank": "این فیلد اجباری است",
+            "invalid": "کد دعوت اشتباه است",
+        },
+    )
+
     password = serializers.CharField(
         required=True,
         write_only=True,
@@ -52,11 +60,13 @@ class RegisterSerializer(serializers.Serializer):
     def create(self, validated_data):
         email = validated_data["email"]
         password = validated_data["password"]
+        referral_code = validated_data.get("referral_code")
         request = self.context.get("request")
 
         result = AuthService.register(
             email=email,
             password=password,
+            referral_code=referral_code,
             request=request,  # type: ignore
         )
 

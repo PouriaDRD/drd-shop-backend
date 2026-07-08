@@ -3,7 +3,6 @@ import logging
 from django.db import transaction
 from rest_framework.exceptions import ValidationError
 
-from notifications.enums import NotificationType
 from notifications.services import NotificationService
 
 from finance.models import DepositRequestModel, WalletModel
@@ -36,7 +35,6 @@ class DepositService:
             user=wallet.user,
             title="درخواست واریز شما دریافت شد",
             message="پس از بررسی نتیجه به شما اعلام می شود!",
-            notification_type=NotificationType.INFO,
         )
 
         logger.info(
@@ -104,7 +102,6 @@ class DepositService:
             user=wallet.user,
             title="درخواست واریز تایید شد!",
             message="درخواست واریز شما تایید شد و مبلغ آن به کیف پول افزوده شد!",
-            notification_type=NotificationType.INFO,
         )
 
         logger.info(
@@ -139,7 +136,6 @@ class DepositService:
             user=deposit.wallet.user,
             title="درخواست واریز رد شد",
             message="برای اطلاعات بیشتر با پشتیبانی در تماس باشید!",
-            notification_type=NotificationType.INFO,
         )
 
         logger.info(

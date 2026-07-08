@@ -1,5 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.db.models.query import QuerySet
+from django.http import HttpRequest
 
 from accounts.models import UserModel
 
@@ -16,6 +18,7 @@ class UserAdmin(BaseUserAdmin):
         # basic information
         "email",
         "email_verified",
+        "referred_by",
         # permissions
         "role",
         "status",
@@ -55,6 +58,7 @@ class UserAdmin(BaseUserAdmin):
                 "classes": ("wide",),
                 "fields": (
                     "email",
+                    "referred_by",
                     "role",
                     "status",
                     "password1",
@@ -71,6 +75,7 @@ class UserAdmin(BaseUserAdmin):
                 "fields": (
                     "id",
                     "email",
+                    "referred_by",
                     "password",
                 ),
             },
@@ -107,3 +112,11 @@ class UserAdmin(BaseUserAdmin):
             },
         ),
     )
+
+    def get_queryset(self, request: HttpRequest):
+        return (
+            super()
+            .get_queryset(request)
+            .select_related("referred_by")
+            .order_by("-created_at")
+        )

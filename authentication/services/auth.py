@@ -18,8 +18,8 @@ from authentication.exceptions import (
     InvalidOTPError,
 )
 
-from accounts.services import UserService
 from accounts.repositories import UserRepository
+from accounts.services import UserService, ReferralService
 
 
 class AuthService:
@@ -34,6 +34,7 @@ class AuthService:
         cls,
         email: str,
         password: str,
+        referral_code: str,
         request: Request,
     ):
         email = cls.normalize_email(email)
@@ -42,6 +43,14 @@ class AuthService:
             email=email,
             password=password,
         )
+
+        ReferralService.create_referral_code(user)
+
+        if referral_code:
+            ReferralService.apply_referral_code(
+                user=user,
+                code=referral_code,
+            )
 
         cls.send_auth_email(
             template="register-success",

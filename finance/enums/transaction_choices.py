@@ -31,3 +31,5 @@ class TransactionType(models.TextChoices):
     WITHDRAW = "withdraw", "Withdraw"
 
     ADJUSTMENT = "adjustment", "Adjustment"
+
+    REFERRAL_REWARD = "referral_reward", "Referral Reward"
