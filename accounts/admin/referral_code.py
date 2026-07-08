@@ -1,5 +1,5 @@
 from django.contrib import admin
-
+from django.utils.html import format_html
 from accounts.models import ReferralCodeModel
 
 
@@ -10,8 +10,8 @@ class ReferralCodeAdmin(admin.ModelAdmin):
         "code",
         "user",
         "signups",
-        "total_earned",
-        "total_paid",
+        "total_earned_display",
+        "total_paid_display",
         "created_at",
     )
 
@@ -33,3 +33,27 @@ class ReferralCodeAdmin(admin.ModelAdmin):
     )
 
     list_filter = ("created_at",)
+
+    def total_earned_display(self, obj):
+
+        if obj.total_earned is None:
+            return "-"
+
+        amount = f"{obj.total_earned:,.0f}"
+
+        return format_html(
+            "<span>{}</span>",
+            amount,
+        )
+
+    def total_paid_display(self, obj):
+
+        if obj.total_paid is None:
+            return "-"
+
+        amount = f"{obj.total_paid:,.0f}"
+
+        return format_html(
+            "<span>{}</span>",
+            amount,
+        )

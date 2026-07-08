@@ -1,5 +1,5 @@
 from django.contrib import admin
-
+from django.utils.html import format_html
 from accounts.models import ReferralProgramModel
 
 
@@ -10,7 +10,7 @@ class ReferralProgramAdmin(admin.ModelAdmin):
         "name",
         "commission_percent",
         "minimum_order_amount",
-        "maximum_reward_amount",
+        "maximum_reward_amount_display",
         "reward_delay_days",
         "is_enabled",
         "created_at",
@@ -64,4 +64,16 @@ class ReferralProgramAdmin(admin.ModelAdmin):
         self.message_user(
             request,
             "Selected programs deactivated.",
+        )
+
+    def maximum_reward_amount_display(self, obj):
+
+        if obj.maximum_reward_amount is None:
+            return "-"
+
+        amount = f"{obj.maximum_reward_amount:,.0f}"
+
+        return format_html(
+            "<span>{}</span>",
+            amount,
         )

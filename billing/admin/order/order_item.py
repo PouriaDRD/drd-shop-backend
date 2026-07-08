@@ -1,5 +1,5 @@
 from django.contrib import admin
-
+from django.utils.html import format_html
 from billing.models import OrderItemModel
 
 DEV = False
@@ -26,7 +26,7 @@ class OrderItemAdmin(admin.ModelAdmin):
         "product",
         "plan",
         "quantity",
-        "price",
+        "price_display",
         "created_at",
     )
 
@@ -62,3 +62,14 @@ class OrderItemAdmin(admin.ModelAdmin):
 
     def has_delete_permission(self, request, obj=None):
         return DEV
+
+    def price_display(self, obj):
+        if obj.price is None:
+            return "-"
+
+        amount = f"{obj.price:,.0f}"
+
+        return format_html(
+            "<span>{}</span>",
+            amount,
+        )

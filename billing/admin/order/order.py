@@ -15,8 +15,8 @@ class OrderAdmin(admin.ModelAdmin):
     list_display = (
         "user",
         "total_price_display",
-        "discount_amount",
-        "subtotal",
+        "discount_amount_display",
+        "subtotal_display",
         "status_badge",
         "updated_at",
         "created_at",
@@ -94,6 +94,28 @@ class OrderAdmin(admin.ModelAdmin):
             return "-"
 
         amount = f"{obj.total_price:,.0f}"
+
+        return format_html(
+            "<span>{}</span>",
+            amount,
+        )
+
+    def subtotal_display(self, obj):
+        if obj.subtotal is None:
+            return "-"
+
+        amount = f"{obj.subtotal:,.0f}"
+
+        return format_html(
+            "<span>{}</span>",
+            amount,
+        )
+
+    def discount_amount_display(self, obj):
+        if obj.discount_amount is None:
+            return "-"
+
+        amount = f"{obj.discount_amount:,.0f}"
 
         return format_html(
             "<span>{}</span>",
