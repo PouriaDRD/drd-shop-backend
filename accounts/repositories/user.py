@@ -1,6 +1,7 @@
 from typing import Optional
 
 from accounts.models import UserModel
+from accounts.enums import UserRole
 
 
 class UserRepository:
@@ -13,6 +14,10 @@ class UserRepository:
     @staticmethod
     def get_by_email(email: str) -> Optional[UserModel]:
         return UserModel.objects.filter(email=email).first()
+
+    @staticmethod
+    def get_admin_user() -> Optional[UserModel]:
+        return UserModel.objects.filter(role=UserRole.SUPERUSER).first()
 
     @staticmethod
     def get_by_id(user_id: str) -> Optional[UserModel]:

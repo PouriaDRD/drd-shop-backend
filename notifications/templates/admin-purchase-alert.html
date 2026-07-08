@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>درخواست خرید جدید</title>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #f6f7fb;
+            font-family: ui-sans-serif, system-ui, -apple-system;
+            color: #111827;
+            direction: rtl;
+            text-align: right;
+        }
+
+        .wrapper {
+            padding: 40px 16px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .card {
+            width: 100%;
+            max-width: 560px;
+            background: #ffffff;
+            border-radius: 14px;
+            border: 1px solid #e5e7eb;
+            overflow: hidden;
+        }
+
+        .header {
+            padding: 20px;
+            background: #16a34a;
+            color: #ffffff;
+            text-align: center;
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .content {
+            padding: 24px;
+        }
+
+        .title {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .text {
+            font-size: 13px;
+            color: #6b7280;
+            line-height: 1.9;
+            margin-bottom: 20px;
+        }
+
+        .info-box {
+            margin: 20px 0;
+            padding: 16px;
+            border-radius: 12px;
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+        }
+
+        .row {
+            margin-bottom: 10px;
+            font-size: 13px;
+            color: #374151;
+        }
+
+        .row:last-child {
+            margin-bottom: 0;
+        }
+
+        .row span {
+            font-weight: 600;
+            color: #111827;
+        }
+
+        .amount-box {
+            margin-top: 18px;
+            padding: 16px;
+            border-radius: 12px;
+            background: #ecfdf5;
+            border: 1px solid #bbf7d0;
+            text-align: center;
+        }
+
+        .amount-title {
+            font-size: 12px;
+            color: #15803d;
+            margin-bottom: 8px;
+        }
+
+        .amount {
+            font-size: 22px;
+            font-weight: 700;
+            color: #166534;
+        }
+
+        .items-box {
+            margin-top: 18px;
+            padding: 16px;
+            border-radius: 12px;
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+        }
+
+        .items-title {
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .item {
+            padding: 10px 0;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 13px;
+            color: #374151;
+        }
+
+        .item:last-child {
+            border-bottom: none;
+        }
+
+        .alert {
+            margin-top: 18px;
+            padding: 12px;
+            border-radius: 10px;
+            background: #fff7ed;
+            border: 1px solid #fed7aa;
+            color: #9a3412;
+            font-size: 12px;
+            line-height: 1.8;
+        }
+
+        .button-wrapper {
+            text-align: center;
+            margin-top: 28px;
+        }
+
+        .button {
+            display: inline-block;
+            background: #1447e6;
+            color: #ffffff !important;
+            text-decoration: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .footer {
+            padding: 16px;
+            text-align: center;
+            font-size: 11px;
+            color: #9ca3af;
+            background: #fafafa;
+            border-top: 1px solid #eeeeee;
+        }
+
+        .brand {
+            color: #1447e6;
+            font-weight: 600;
+        }
+    </style>
+
+</head>
+
+
+<body>
+
+    <div class="wrapper">
+
+        <div class="card">
+
+            <!-- Header -->
+
+            <div class="header">
+                درخواست خرید جدید ثبت شد
+            </div>
+
+
+            <!-- Content -->
+
+            <div class="content">
+
+
+                <div class="title">
+                    سلام مدیر 👋
+                </div>
+
+
+                <div class="text">
+                    یک درخواست خرید جدید توسط کاربر ثبت شده است.
+                    لطفاً سفارش را بررسی و در صورت تایید، فرآیند پردازش را آغاز کنید.
+                </div>
+
+
+                <!-- Order Information -->
+
+                <div class="info-box">
+
+
+                    <div class="row">
+                        کاربر:
+                        <span>{{ user_email }}</span>
+                    </div>
+
+
+                    <div class="row">
+                        شماره سفارش:
+                        <span>#{{ order_id }}</span>
+                    </div>
+
+
+                    <div class="row">
+                        وضعیت سفارش:
+                        <span>{{ order_status }}</span>
+                    </div>
+                </div>
+
+
+                <!-- Amount -->
+
+                <div class="amount-box">
+
+                    <div class="amount-title">
+                        مبلغ کل سفارش
+                    </div>
+
+
+                    <div class="amount">
+                        {{ total_amount }} تومان
+                    </div>
+
+
+                </div>
+
+                <!-- Alert -->
+
+                <div class="alert">
+
+                    لطفاً قبل از تایید سفارش، اطلاعات کاربر، محصولات و وضعیت پرداخت را بررسی کنید.
+
+                </div>
+
+            </div>
+
+            <!-- Footer -->
+
+            <div class="footer">
+
+                این پیام به صورت خودکار از طرف
+                <span class="brand">{{ site_name }}</span>
+                ارسال شده است.
+
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -3,6 +3,8 @@ import logging
 from django.db import transaction
 from rest_framework.exceptions import ValidationError
 
+from accounts.repositories import UserRepository
+from notifications.tasks import send_email_task
 from notifications.services import NotificationService
 
 from finance.models import DepositRequestModel, WalletModel
@@ -36,6 +38,8 @@ class DepositService:
             title="درخواست واریز شما دریافت شد",
             message="پس از بررسی نتیجه به شما اعلام می شود!",
         )
+
+        DepositService.alert_admin(deposit)
 
         logger.info(
             f"Deposit request created | id={str(deposit.id)} amount={deposit.amount}",
@@ -143,3 +147,49 @@ class DepositService:
         )
 
         return deposit
+
+    @staticmethod
+    def alert_admin(deposit: DepositRequestModel):
+        """
+        Send admin notification for deposit approval.
+        """
+
+        admin_user = UserRepository.get_admin_user()
+
+        if not admin_user:
+            return
+
+        wallet = deposit.wallet
+
+        send_email_task.delay(
+            template_slug="admin-deposit-alert",
+            recipient_email=admin_user.email,
+            recipient_name=str(admin_user),
+            context={
+                "user_email": wallet.user.email,
+                "amount": deposit.amount,
+                "payment_method": deposit.payment_method,
+                "tracking_code": deposit.tracking_code,
+                "reference_number": deposit.reference_number,
+                "sender_name": deposit.sender_name,
+                "sender_card_number": deposit.sender_card_number,
+                "site_name": "DRD Shop",
+            },
+        )  # type: ignore
+
+
+# {{ site_name }}
+
+# {{ user_email }}
+
+# {{ amount }}
+
+# {{ payment_method }}
+
+# {{ tracking_code }}
+
+# {{ reference_number }}
+
+# {{ sender_name }}
+
+# {{ sender_card_number }}

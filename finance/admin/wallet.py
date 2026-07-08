@@ -9,7 +9,7 @@ DEV = True
 class WalletAdmin(admin.ModelAdmin):
     list_display = (
         "user",
-        "balance",
+        "balance_display",
         "updated_at",
         "created_at",
     )
@@ -36,3 +36,6 @@ class WalletAdmin(admin.ModelAdmin):
 
     def has_delete_permission(self, request, obj=None):
         return DEV
+
+    def balance_display(self, obj):
+        return f"{obj.balance:,}"

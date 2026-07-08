@@ -3,7 +3,10 @@ import logging
 from django.db import transaction
 from rest_framework.exceptions import ValidationError
 
+from accounts.repositories import UserRepository
+from notifications.tasks import send_email_task
 from billing.services.order import OrderService
+
 from finance.models import PurchaseRequestModel
 from finance.enums import TransactionType, TransactionStatus
 from finance.repositories import PurchaseRepository, WalletRepository
@@ -67,6 +70,8 @@ class PurchaseService:
         validated_data["transaction"] = transaction_obj
 
         purchase = PurchaseRepository.create(**validated_data)
+
+        PurchaseService.alert_admin(purchase)
 
         logger.info(
             f"Purchase request created: id={str(purchase.id)}, user={str(wallet.user)}, amount={purchase.amount}",
@@ -146,3 +151,40 @@ class PurchaseService:
         )
 
         return purchase
+
+    @staticmethod
+    def alert_admin(purchase: PurchaseRequestModel):
+        """
+        Send admin notification for purchase approval.
+        """
+
+        admin_user = UserRepository.get_admin_user()
+
+        if not admin_user:
+            return
+
+        wallet = purchase.wallet
+
+        send_email_task.delay(
+            template_slug="admin-purchase-alert",
+            recipient_email=admin_user.email,
+            recipient_name=str(admin_user),
+            context={
+                "user_email": wallet.user.email,
+                "total_amount": purchase.amount,
+                "order_id": str(purchase.order.id),
+                "order_status": purchase.order.status,
+                "site_name": "DRD Shop",
+            },
+        )  # type: ignore
+
+
+# {{ site_name }}
+
+# {{ user_email }}
+
+# {{ order_id }}
+
+# {{ order_status }}
+
+# {{ total_amount }}
