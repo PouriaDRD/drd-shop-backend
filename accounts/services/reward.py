@@ -46,7 +46,7 @@ class RewardService:
                 wallet=reward.inviter.wallet,  # type: ignore
                 amount=reward.reward_amount,
                 transaction_type=TransactionType.REFERRAL_REWARD,
-                description=f"پاداش پرداخت موفق {reward.invited_user}",
+                description=f"پاداش سفارش موفق {reward.invited_user}",
             )
 
             TransactionService.approve(str(transaction.id))
