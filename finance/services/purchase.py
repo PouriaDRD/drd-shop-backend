@@ -4,8 +4,11 @@ from django.db import transaction
 from rest_framework.exceptions import ValidationError
 
 from accounts.repositories import UserRepository
-from notifications.tasks import send_email_task
 from billing.services.order import OrderService
+
+
+from notifications.tasks import send_email_task
+from notifications.services import NotificationService
 
 from finance.models import PurchaseRequestModel
 from finance.enums import TransactionType, TransactionStatus
@@ -164,6 +167,17 @@ class PurchaseService:
             return
 
         wallet = purchase.wallet
+
+        NotificationService.create_success(
+            user=admin_user,
+            title="تراکنش خرید جدید ثبت شد!",
+            message=(
+                f"تراکنش خرید برای کیف پول شما ثبت شد."
+                f"مبلغ: {purchase.amount}\n"
+                f"سفارش: {str(purchase.order.id)}\n"
+                f"کاربر: {wallet.user}\n"
+            ),
+        )
 
         send_email_task.delay(
             template_slug="admin-purchase-alert",

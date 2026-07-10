@@ -7,8 +7,9 @@ from .otp import OTPService
 from .token import TokenService
 from .login_history import LoginHistoryService
 
+from accounts.models import UserModel
+
 from notifications.tasks import send_email_task
-from notifications.enums import NotificationType
 from notifications.services import NotificationService
 
 from authentication.enums import OTPType
@@ -68,6 +69,8 @@ class AuthService:
             user,
             request,
         )
+
+        cls.alert_admin(user)
 
         return cls.auth_response(user)
 
@@ -241,6 +244,23 @@ class AuthService:
                 "site_name": cls.SITE_NAME,
             },
         )  # type: ignore
+
+    @classmethod
+    def alert_admin(cls, user: UserModel):
+        """
+        Send admin notification for user approval.
+        """
+
+        admin_user = UserRepository.get_admin_user()
+
+        if not admin_user:
+            return
+
+        NotificationService.create_success(
+            user=admin_user,
+            title="کاربر ثبت شد!",
+            message=(f"کاربر «{user.email}» ثبت شد.\n" f"کاربر: {str(user)}\n"),
+        )
 
     @classmethod
     def get_device_info(

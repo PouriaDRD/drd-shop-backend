@@ -161,6 +161,16 @@ class DepositService:
 
         wallet = deposit.wallet
 
+        NotificationService.create_success(
+            user=admin_user,
+            title="درخواست واریز جدید ثبت شد!",
+            message=(
+                f"درخواست واریز برای کیف پول شما ثبت شد."
+                f"مبلغ: {deposit.amount}\n"
+                f"کاربر: {wallet.user}\n"
+            ),
+        )
+
         send_email_task.delay(
             template_slug="admin-deposit-alert",
             recipient_email=admin_user.email,

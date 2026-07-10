@@ -1,6 +1,8 @@
 from django.db import transaction
 from django.core.exceptions import PermissionDenied
 
+from accounts.repositories import UserRepository
+
 from support.repositories import (
     TicketRepository,
     TicketMessageRepository,
@@ -58,6 +60,8 @@ class TicketService:
                     message=ticket_message,
                     file=file,
                 )
+
+        TicketService.alert_admin(ticket)
 
         return ticket
 
@@ -127,6 +131,8 @@ class TicketService:
             ticket,
             status=TicketStatus.OPEN,
         )
+
+        TicketService.alert_admin(ticket)
 
         return ticket_message
 
@@ -211,6 +217,27 @@ class TicketService:
                 "site_name": "DRD Shop",
             },
         )  # type: ignore
+
+    @staticmethod
+    def alert_admin(ticket: TicketModel):
+        """
+        Send admin notification for ticket approval.
+        """
+
+        admin_user = UserRepository.get_admin_user()
+
+        if not admin_user:
+            return
+
+        NotificationService.create_success(
+            user=admin_user,
+            title="تیکت جدید ثبت شد!",
+            message=(
+                f"یک تیکت جدید ثبت شد.\n"
+                f"موضوع: {ticket.title}\n"
+                f"کاربر: {ticket.user}\n"
+            ),
+        )
 
 
 #         {{ name }}
