@@ -73,6 +73,25 @@ class TicketListSerializer(serializers.ModelSerializer):
         read_only_fields = ["__all__"]
 
 
+class AdminTicketListSerializer(serializers.ModelSerializer):
+    user = serializers.ReadOnlyField(source="user.email")
+
+    class Meta:
+        model = TicketModel
+
+        fields = (
+            "id",
+            "user",
+            "title",
+            "category",
+            "status",
+            "updated_at",
+            "created_at",
+        )
+
+        read_only_fields = ["__all__"]
+
+
 class TicketDetailSerializer(serializers.ModelSerializer):
 
     messages = TicketMessageSerializer(
@@ -86,6 +105,30 @@ class TicketDetailSerializer(serializers.ModelSerializer):
         fields = (
             "id",
             "title",
+            "category",
+            "status",
+            "messages",
+            "updated_at",
+            "created_at",
+        )
+
+
+class AdminTicketDetailSerializer(serializers.ModelSerializer):
+    user = serializers.ReadOnlyField(source="user.email")
+
+    messages = TicketMessageSerializer(
+        many=True,
+        read_only=True,
+    )
+
+    class Meta:
+        model = TicketModel
+
+        fields = (
+            "id",
+            "title",
+            "user",
+            "category",
             "status",
             "messages",
             "updated_at",

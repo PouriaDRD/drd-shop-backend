@@ -6,6 +6,9 @@ from support.api.views import (
     TicketDetailAPIView,
     TicketReplyAPIView,
     TicketCloseAPIView,
+    AdminTicketListAPIView,
+    AdminTicketDetailAPIView,
+    AdminTicketReplyAPIView,
 )
 
 urlpatterns = [
@@ -33,5 +36,20 @@ urlpatterns = [
         "my-tickets/<uuid:id>/close/",
         TicketCloseAPIView.as_view(),
         name="ticket-close",
+    ),
+    path(
+        "admin-tickets/",
+        AdminTicketListAPIView.as_view(),
+        name="admin-ticket-list",
+    ),
+    path(
+        "admin-tickets/<uuid:id>/",
+        AdminTicketDetailAPIView.as_view(),
+        name="admin-ticket-detail",
+    ),
+    path(
+        "admin-tickets/<uuid:id>/reply/",
+        AdminTicketReplyAPIView.as_view(),
+        name="admin-ticket-reply",
     ),
 ]

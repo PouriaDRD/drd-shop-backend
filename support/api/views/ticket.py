@@ -8,8 +8,8 @@ from rest_framework.generics import (
 )
 from rest_framework.views import APIView
 from rest_framework.exceptions import ValidationError
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.throttling import ScopedRateThrottle
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.parsers import (
     MultiPartParser,
     FormParser,

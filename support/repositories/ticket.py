@@ -1,8 +1,8 @@
 from django.db import transaction
-from django.db.models import QuerySet
+from django.db.models import Prefetch, QuerySet
 
-from support.models import TicketModel
 from support.enums import TicketStatus
+from support.models import TicketModel, TicketMessageModel, TicketAttachmentModel
 
 
 class TicketRepository:
@@ -44,7 +44,7 @@ class TicketRepository:
         user_id,
     ) -> QuerySet[TicketModel]:
         """
-        Get all user tickets.
+        Return all tickets for a user with messages and attachments prefetched.
         """
 
         return (
@@ -52,11 +52,66 @@ class TicketRepository:
                 user_id=user_id,
             )
             .prefetch_related(
+                Prefetch(
+                    "messages",
+                    queryset=(
+                        TicketMessageModel.objects.select_related("sender")
+                        .prefetch_related(
+                            Prefetch(
+                                "attachments",
+                                queryset=TicketAttachmentModel.objects.only(
+                                    "id",
+                                    "message_id",
+                                    "file",
+                                    "created_at",
+                                ),
+                            )
+                        )
+                        .order_by("created_at")
+                    ),
+                )
+            )
+            .order_by("-created_at")
+        )
+
+    @staticmethod
+    def get_all_tickets() -> QuerySet[TicketModel]:
+        """
+        Return all tickets.
+        """
+
+        return TicketModel.objects.select_related("user").prefetch_related(
+            Prefetch(
                 "messages",
+                queryset=TicketMessageModel.objects.order_by("created_at"),
             )
-            .order_by(
-                "-created_at",
+        )
+
+    @staticmethod
+    def get_admin_ticket(ticket_id: str):
+        return (
+            TicketModel.objects.select_related("user")
+            .prefetch_related(
+                Prefetch(
+                    "messages",
+                    queryset=(
+                        TicketMessageModel.objects.select_related("sender")
+                        .prefetch_related(
+                            Prefetch(
+                                "attachments",
+                                queryset=TicketAttachmentModel.objects.only(
+                                    "id",
+                                    "message_id",
+                                    "file",
+                                    "created_at",
+                                ),
+                            )
+                        )
+                        .order_by("created_at")
+                    ),
+                )
             )
+            .get(id=ticket_id)
         )
 
     @staticmethod

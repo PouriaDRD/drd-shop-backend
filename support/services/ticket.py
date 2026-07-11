@@ -75,6 +75,11 @@ class TicketService:
         )
 
     @staticmethod
+    def get_all_tickets():
+
+        return TicketRepository.get_all_tickets()
+
+    @staticmethod
     def get_ticket(
         *,
         ticket_id,
@@ -92,6 +97,10 @@ class TicketService:
             raise PermissionDenied("You cannot access this ticket.")
 
         return ticket
+
+    @staticmethod
+    def get_admin_ticket(ticket_id: str) -> TicketModel:
+        return TicketRepository.get_admin_ticket(ticket_id=ticket_id)
 
     @staticmethod
     @transaction.atomic
@@ -194,6 +203,60 @@ class TicketService:
             TicketService.send_reply_email(ticket.user, ticket)
 
         return
+
+    @staticmethod
+    @transaction.atomic
+    def admin_reply(
+        *,
+        ticket_id,
+        admin,
+        message,
+        attachments=None,
+    ):
+        """
+        Reply to a ticket as a staff member.
+        """
+
+        ticket = TicketRepository.lock(ticket_id)
+
+        if not ticket:
+            raise ValueError("Ticket not found")
+
+        if ticket.status == TicketStatus.CLOSED:
+            raise ValueError("Ticket is closed")
+
+        ticket_message = TicketMessageRepository.create(
+            ticket=ticket,
+            sender=admin,
+            message=message,
+            is_staff_reply=True,
+        )
+
+        if attachments:
+            for file in attachments:
+                TicketAttachmentRepository.create(
+                    message=ticket_message,
+                    file=file,
+                )
+
+        TicketRepository.update_status(
+            ticket,
+            status=TicketStatus.ANSWERED,
+        )
+
+        NotificationService.create_success(
+            user=ticket.user,
+            title="پاسخ جدید برای تیکت شما",
+            message=f"به تیکت «{ticket.title}» پاسخ داده شد.",
+        )
+
+        if ticket.user.email_verified:
+            TicketService.send_reply_email(
+                ticket.user,
+                ticket,
+            )
+
+        return ticket_message
 
     @staticmethod
     def send_reply_email(user, ticket: TicketModel):
