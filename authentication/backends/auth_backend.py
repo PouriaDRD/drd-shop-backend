@@ -26,15 +26,19 @@ class AuthBackend(BaseBackend):
         try:
             # try to find user by phone_number
             user = UserModel.objects.get(email__iexact=username)
-        except UserModel.DoesNotExist:
-            # try to find user by username
-            user = UserModel.objects.get(username__iexact=username)
-            logger.info(f"User {username} failed login with invalid credentials")
-            return None
+        # except UserModel.DoesNotExist:
+        #     # try to find user by username
+        #     user = UserModel.objects.get(username__iexact=username)
+        #     logger.info(f"User {username} failed login with invalid credentials")
+        #     return None
         except UserModel.MultipleObjectsReturned:
             logger.error(
                 f"Multiple users with same username or email found: {username}"
             )
+            return None
+
+        except UserModel.DoesNotExist:
+            logger.info(f"User {username} failed login with invalid credentials")
             return None
 
         if user.check_password(password) and user.is_active:
