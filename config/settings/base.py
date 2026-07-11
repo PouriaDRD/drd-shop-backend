@@ -11,6 +11,11 @@ SECRET_KEY = config.app.secret_key
 
 AUTH_USER_MODEL = "accounts.UserModel"
 
+AUTHENTICATION_BACKENDS = [
+    "authentication.backends.AuthBackend",
+    "django.contrib.auth.backends.ModelBackend",
+]
+
 
 # ---------------------------------------------------------------
 # Installed Apps Configuration

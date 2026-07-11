@@ -84,6 +84,7 @@ class AuthService:
         email = cls.normalize_email(email)
 
         user = authenticate(
+            request=request,  # type: ignore
             username=email,
             password=password,
         )
@@ -103,17 +104,6 @@ class AuthService:
                 request=request,
                 user=user,
             )
-
-        NotificationService.create_success(
-            user=user,  # type: ignore
-            title="ورود موفق بود!",
-            message="شما با موفقیت وارد حساب خود شدید.",
-        )
-
-        LoginHistoryService.create_success(
-            user=user,  # type: ignore
-            request=request,
-        )
 
         return cls.auth_response(user)
 
