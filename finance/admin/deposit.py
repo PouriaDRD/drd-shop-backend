@@ -5,7 +5,7 @@ from finance.enums import DepositStatus, DepositPaymentMethod
 from finance.models import DepositRequestModel
 from finance.services import DepositService
 
-DEV = False
+DEV = True
 
 
 @admin.register(DepositRequestModel)

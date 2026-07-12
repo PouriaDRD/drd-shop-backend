@@ -3,7 +3,7 @@ from django.utils.html import format_html
 
 from finance.models import LedgerEntryModel
 
-DEV = False
+DEV = True
 
 
 @admin.register(LedgerEntryModel)
