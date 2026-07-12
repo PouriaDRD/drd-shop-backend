@@ -27,12 +27,12 @@ class LedgerEntryAdmin(admin.ModelAdmin):
 
     readonly_fields = (
         "id",
-        "transaction",
+        # "transaction",
         "wallet",
         "transaction_type",
-        "amount",
-        "balance_before",
-        "balance_after",
+        # "amount",
+        # "balance_before",
+        # "balance_after",
         "created_at",
     )
 

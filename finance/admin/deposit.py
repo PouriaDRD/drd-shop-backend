@@ -36,9 +36,9 @@ class DepositRequestAdmin(admin.ModelAdmin):
 
     readonly_fields = (
         "id",
-        "status",
+        # "status",
         "transaction",
-        "is_processed",
+        # "is_processed",
         "reviewed_at",
         "updated_at",
         "created_at",
