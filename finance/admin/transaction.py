@@ -5,7 +5,7 @@ from finance.models import TransactionModel
 from finance.enums import TransactionStatus, TransactionType
 from finance.services import TransactionService
 
-DEV = False
+DEV = True
 
 
 @admin.register(TransactionModel)
@@ -32,11 +32,11 @@ class TransactionAdmin(admin.ModelAdmin):
     readonly_fields = (
         "id",
         "wallet",
-        "amount",
+        # "amount",
         "type",
-        "status",
-        "is_processed",
-        "reviewed_at",
+        # "status",
+        # "is_processed",
+        # "reviewed_at",
         "created_at",
         "updated_at",
     )
