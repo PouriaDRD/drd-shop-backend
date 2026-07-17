@@ -54,23 +54,23 @@ class DepositCreateSerializer(serializers.ModelSerializer):
     )
 
     reference_number = serializers.CharField(
-        required=True,
+        required=False,
         max_length=255,
         trim_whitespace=True,
-        error_messages={
-            "required": "Reference number is required.",
-            "blank": "Reference number is required.",
-        },
+        # error_messages={
+        #     "required": "Reference number is required.",
+        #     "blank": "Reference number is required.",
+        # },
     )
 
     tracking_code = serializers.CharField(
-        required=True,
+        required=False,
         max_length=255,
         trim_whitespace=True,
-        error_messages={
-            "required": "Tracking code is required.",
-            "blank": "Tracking code is required.",
-        },
+        # error_messages={
+        #     "required": "Tracking code is required.",
+        #     "blank": "Tracking code is required.",
+        # },
     )
 
     sender_name = serializers.CharField(
